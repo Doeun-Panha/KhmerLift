@@ -1,5 +1,5 @@
 //
-//  SwiftUI+Extension.swift
+//  Font+Extension.swift
 //  KhmerLift
 //
 //  Created by Panha on 17/9/26.
@@ -12,3 +12,4 @@ extension Font {
         return .custom("Nunito", size: size).weight(weight)
     }
 }
+

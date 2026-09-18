@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct GlassTextFieldView: View {
+    let cornerRadius: CGFloat = 32.0
     let title: String
     let placeholder: String
     @Binding var text: String
@@ -20,26 +21,43 @@ struct GlassTextFieldView: View {
             Text(title)
                 .font(.nunito(16, weight: .semibold))
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
             
             HStack {
-                TextField(placeholder, text: $text)
+                TextField(
+                    "",
+                    text: $text,
+                    prompt: Text(placeholder)
+                        .font(.nunito(16, weight: .semibold))
+                        .foregroundStyle(.gray)
+                )
                     .focused($isFocused)
                     .keyboardType(keyboardType)
                     .font(.nunito(16, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
+                    .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { obj in
+                        if let textField = obj.object as? UITextField {
+                            textField.selectAll(nil)
+                        }
+                    }
                 
                 if !text.isEmpty {
                     Button(action: { text = "" }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.white)
+                            .foregroundStyle(.gray)
                     }
                 }
             }
             .padding()
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                        .environment(\.colorScheme, .dark)
+                }
+            )
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(
                         LinearGradient(
                             colors: [
@@ -63,7 +81,10 @@ struct GlassTextFieldView: View {
         
         var body: some View {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Image("background")
+                    .resizable()
+                    .ignoresSafeArea()
+                    .containerRelativeFrame([.horizontal, .vertical])
                 
                 GlassTextFieldView(
                     title: "Input your bodyweight",
