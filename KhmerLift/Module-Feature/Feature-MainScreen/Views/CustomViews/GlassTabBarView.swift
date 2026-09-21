@@ -7,36 +7,6 @@
 
 import SwiftUI
 
-enum TabItem: String, CaseIterable {
-    case home
-    case progress
-    case more
-    
-    var title: String {
-        switch self {
-        case .home: return "Home"
-        case .progress: return "Progress"
-        case .more: return "More"
-        }
-    }
-    
-    var selectedIcon: String {
-        switch self {
-        case .home: return "home-selected-icon"
-        case .progress: return "progress-selected-icon"
-        case .more: return "more-selected-icon"
-        }
-    }
-    
-    var unselectedIcon: String {
-        switch self {
-        case .home: return "home-unselected-icon"
-        case .progress: return "progress-unselected-icon"
-        case .more: return "more-unselected-icon"
-        }
-    }
-}
-
 struct GlassTabBarView: View {
     @Binding var selectedTab: TabItem
     var onAddTapped: (() -> Void)? = nil

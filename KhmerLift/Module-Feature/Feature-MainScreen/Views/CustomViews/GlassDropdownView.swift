@@ -4,109 +4,160 @@
 //
 //  Created by Panha on 18/9/26.
 //
-
 import SwiftUI
 
-enum DropdownItem: String, CaseIterable, Identifiable {
-    case chest = "Chest"
-    case shoulder = "Shoulder"
-    case back = "Back"
-    case biceps = "Biceps"
-    case triceps = "Triceps"
-    case forearm = "Forearm"
-    case abs = "Abs"
-    case quads = "Quads"
-    case glutes = "Glutes"
-    case hamstring = "Hamstring"
-    case calves = "Calves"
-    
-    var id: String { self.rawValue }
-}
-
-struct GlassDropdownView: View {
-    let cornerRadius: CGFloat = 32.0
+struct GlassDropdownView<T: SelectableItem>: View {
     let title: String
+    @Binding var selection: T?
+    let items: [T]
     let placeholder: String
-    @Binding var selectedItem: DropdownItem?
+    let isDisabled: Bool
     
-    @State private var isExpanded: Bool = false
+    let onAddNew: () -> Void
+    
+    @State private var isShowingSheet: Bool = false
+    
+    init(
+        title: String,
+        placeholder: String,
+        selection: Binding<T?>,
+        items: [T],
+        isDisabled: Bool = false,
+        onAddNew: @escaping () -> Void
+    ) {
+        self.title = title
+        self.placeholder = placeholder
+        self._selection = selection
+        self.items = items
+        self.isDisabled = isDisabled
+        self.onAddNew = onAddNew
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.nunito(16, weight: .semibold))
-                .fontWeight(.bold)
                 .foregroundStyle(.white)
             
-            Menu {
-                ForEach(DropdownItem.allCases) { item in
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            selectedItem = item
-                        }
-                    }) {
-                        HStack {
-                            Text(item.rawValue)
-                            if selectedItem == item {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
-                }
-            } label: {
+            Button(action: {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                isShowingSheet = true
+            }) {
                 HStack {
-                    Text(selectedItem?.rawValue ?? placeholder)
+                    Text(selection?.displayName ?? placeholder)
                         .font(.nunito(16, weight: .semibold))
-                        .foregroundStyle(selectedItem == nil ? .gray : .white)
+                        .foregroundStyle(selection == nil ? .gray : .white)
                     
                     Spacer()
                     
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.7))
-                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.nunito(16, weight: .semibold))
+                        .foregroundStyle(.white)
                 }
                 .padding()
                 .background(
                     ZStack {
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        RoundedRectangle(cornerRadius: 32, style: .continuous)
                             .fill(Color.black.opacity(0.10))
-                        
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        RoundedRectangle(cornerRadius: 32, style: .continuous)
                             .fill(.ultraThinMaterial)
                             .environment(\.colorScheme, .dark)
                     }
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    RoundedRectangle(cornerRadius: 32, style: .continuous)
                         .stroke(
                             LinearGradient(
-                                colors: [
-                                    isExpanded ? .cyan.opacity(0.8) : .white.opacity(0.3),
-                                    .white.opacity(0.05)
-                                ],
+                                colors: [.white.opacity(0.3), .white.opacity(0.05)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: isExpanded ? 1.5 : 1.0
+                            lineWidth: 1.0
                         )
                 )
             }
+            .disabled(isDisabled)
+            .opacity(isDisabled ? 0.5 : 1.0)
         }
-    }
-}
-
-#Preview {
-    ZStack {
-        Image("background")
-            .resizable()
-            .ignoresSafeArea()
-            
-        GlassDropdownView(
-            title: "Target Muscle",
-            placeholder: "Select Muscle",
-            selectedItem: .constant(.chest)
-        )
-        .padding()
+        .sheet(isPresented: $isShowingSheet) {
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    
+                    Text("Select \(title)")
+                        .font(.nunito(18, weight: .bold))
+                        .foregroundStyle(.white)
+                    
+                    Spacer()
+                }
+                .padding([.top, .horizontal], 20)
+                
+                Divider()
+                    .background(.white.opacity(0.4))
+                    .padding(.top, 12)
+                
+                ScrollView {
+                    VStack(spacing: 8) {
+                        ForEach(items) { item in
+                            Button(action: {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    selection = item
+                                    isShowingSheet = false
+                                }
+                            }) {
+                                HStack {
+                                    Text(item.displayName)
+                                        .font(.nunito(16, weight: .medium))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                    if selection == item {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundStyle(.cyan)
+                                    }
+                                }
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(selection == item ? Color.white.opacity(0.12) : Color.clear)
+                                )
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 12)
+                }
+                
+                VStack {
+                    Button(action: {
+                        isShowingSheet = false
+                        onAddNew()
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus")
+                            Text("Add New \(title)")
+                        }
+                        .font(.nunito(16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Capsule().fill(Color.cyan))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 16)
+            }
+            .presentationDetents([.medium, .fraction(0.7)])
+            .presentationCornerRadius(36)
+            .presentationBackground {
+                ZStack {
+                    Color.black.opacity(0.4)
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .environment(\.colorScheme, .dark)
+                }
+                .ignoresSafeArea()
+            }
+        }
     }
 }
