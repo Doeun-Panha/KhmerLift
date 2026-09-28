@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeScreenView: View {
     @State private var viewModel = HomeScreenViewModel()
+    @State private var displayInfo: DisplayLayoutInfo?
     @FocusState private var focusedField: FormField?
     
     var body: some View {
@@ -20,6 +21,7 @@ struct HomeScreenView: View {
             }
         }
         .padding(.horizontal)
+        .padding(.leading, 10)
         .onSubmit(advanceFocus)
     }
     
@@ -42,7 +44,7 @@ struct HomeScreenView: View {
                 .frame(width: 25, height: 25)
                 .foregroundStyle(.gray)
         }
-        .padding(.top, 10)
+        .padding(.top, 30)
     }
     
     private var formContentView: some View {
@@ -116,7 +118,6 @@ struct HomeScreenView: View {
         }
     }
 }
-
 
 #Preview {
     ZStack {
