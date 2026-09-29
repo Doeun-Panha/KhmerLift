@@ -2,60 +2,105 @@
 //  HomeScreenModel.swift
 //  KhmerLift
 //
-//  Created by Panha on 21/9/26.
-//
 
 import SwiftUI
+import SwiftData
 
 protocol SelectableItem: Identifiable, Hashable {
+    var name: String { get }
     var displayName: String { get }
 }
 
-struct MuscleCategory: SelectableItem {
-    let id = UUID()
-    let name: String
+extension SelectableItem {
     var displayName: String { name }
 }
 
-struct Exercise: SelectableItem {
-    let id = UUID()
-    let categoryId: UUID
-    let name: String
-    var displayName: String { name }
+@Model
+final class MuscleCategory {
+    var id: UUID
+    var name: String
+    
+    init(id: UUID = UUID(), name: String) {
+        self.id = id
+        self.name = name
+    }
 }
 
-enum FormField: Hashable {
-    case bodyWeight
-    case weight
-    case repetition
+extension MuscleCategory: Equatable {
+    nonisolated static func == (lhs: MuscleCategory, rhs: MuscleCategory) -> Bool {
+        lhs.persistentModelID == rhs.persistentModelID
+    }
 }
 
-enum TabItem: String, CaseIterable {
-    case home
-    case progress
-    case more
-    
-    var title: String {
-        switch self {
-        case .home: return "Home"
-        case .progress: return "Progress"
-        case .more: return "More"
-        }
+extension MuscleCategory: Hashable {
+    nonisolated func hash(into hasher: inout Hasher) {
+        hasher.combine(persistentModelID)
     }
+}
+
+extension MuscleCategory: SelectableItem {}
+
+@Model
+final class Exercise {
+    var id: UUID
+    var categoryId: UUID
+    var name: String
     
-    var selectedIcon: String {
-        switch self {
-        case .home: return "home-selected-icon"
-        case .progress: return "progress-selected-icon"
-        case .more: return "more-selected-icon"
-        }
+    init(id: UUID = UUID(), categoryId: UUID, name: String) {
+        self.id = id
+        self.categoryId = categoryId
+        self.name = name
     }
+}
+
+extension Exercise: Equatable {
+    nonisolated static func == (lhs: Exercise, rhs: Exercise) -> Bool {
+        lhs.persistentModelID == rhs.persistentModelID
+    }
+}
+
+extension Exercise: Hashable {
+    nonisolated func hash(into hasher: inout Hasher) {
+        hasher.combine(persistentModelID)
+    }
+}
+
+extension Exercise: SelectableItem {}
+
+@Model
+final class BodyWeightLog {
+    var id: UUID
+    var date: Date
+    var bodyWeight: Double
     
-    var unselectedIcon: String {
-        switch self {
-        case .home: return "home-unselected-icon"
-        case .progress: return "progress-unselected-icon"
-        case .more: return "more-unselected-icon"
-        }
+    init(
+        date: Date = Date(),
+        bodyWeight: Double
+    ) {
+        self.id = UUID()
+        self.date = date
+        self.bodyWeight = bodyWeight
+    }
+}
+
+@Model
+final class ExerciseLog {
+    var id: UUID
+    var date: Date
+    var exercise: String
+    var weight: Double
+    var repetition: Int
+    
+    init(
+        date: Date = Date(),
+        exercise: String,
+        weight: Double,
+        repetition: Int
+    ) {
+        self.id = UUID()
+        self.date = date
+        self.exercise = exercise
+        self.weight = weight
+        self.repetition = repetition
     }
 }
