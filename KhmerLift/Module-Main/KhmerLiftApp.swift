@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct KhmerLiftApp: App {
@@ -13,5 +14,6 @@ struct KhmerLiftApp: App {
         WindowGroup {
             MainScreenView()
         }
+        .modelContainer(SwiftDataContainer.shared)
     }
 }

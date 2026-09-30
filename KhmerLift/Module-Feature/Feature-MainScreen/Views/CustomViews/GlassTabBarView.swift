@@ -58,7 +58,7 @@ struct GlassTabBarView: View {
             }) {
                 Image(systemName: "plus")
                     .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundColor(.white)
                     .frame(width: 64, height: 64)
                     .background(Color(red: 0.35, green: 0.65, blue: 1.0))
                     .clipShape(Circle())
