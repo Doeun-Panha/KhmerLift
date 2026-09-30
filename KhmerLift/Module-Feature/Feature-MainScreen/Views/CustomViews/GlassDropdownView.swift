@@ -147,6 +147,8 @@ struct GlassDropdownView<T: SelectableItem>: View {
                 .padding(.horizontal)
                 .padding(.bottom, 16)
             }
+            .frame(maxWidth: .infinity)
+            .ignoresSafeArea(.all, edges: .horizontal)
             .presentationDetents([.medium, .fraction(0.7)])
             .presentationCornerRadius(36)
             .presentationBackground {
@@ -156,7 +158,6 @@ struct GlassDropdownView<T: SelectableItem>: View {
                         .fill(.ultraThinMaterial)
                         .environment(\.colorScheme, .dark)
                 }
-                .ignoresSafeArea()
             }
         }
     }

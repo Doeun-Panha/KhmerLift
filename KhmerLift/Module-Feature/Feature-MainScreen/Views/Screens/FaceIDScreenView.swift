@@ -1,0 +1,140 @@
+//
+//  FaceIDScreenView.swift
+//  KhmerLift
+//
+//  Created by Panha on 25/9/26.
+//
+
+import SwiftUI
+
+struct FaceIDScreenView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    @StateObject private var cameraManager = CameraManager()
+
+    @Binding var timer: Int
+    @Binding var status: String
+    
+    @State private var isMuted: Bool = false
+
+    var body: some View {
+        ZStack {
+            Image("background")
+                .resizable()
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                HStack(spacing: 12) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+
+                    Text("Verify Face")
+                        .font(.nunito(22, weight: .bold))
+                        .foregroundStyle(.white)
+
+                    Spacer()
+
+                    Image("logo-icon")
+                        .renderingMode(.original)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
+                }
+                .padding(.horizontal, 16)
+
+                VStack(spacing: 30) {
+                    ZStack {
+                        CameraPreview(session: cameraManager.session)
+                            .frame(width: 275, height: 275)
+                            .clipShape(Circle())
+
+                        Circle()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 3)
+                            .frame(width: 275, height: 275)
+
+                        Image(systemName: "person.crop.artframe")
+                            .font(.system(size: 80))
+                            .foregroundStyle(.white.opacity(0.25))
+                    }
+                    .padding(.top, 30)
+                    .padding(.bottom, 20)
+                    .onAppear {
+                        cameraManager.checkPermissionAndStart()
+                    }
+                    .onDisappear {
+                        cameraManager.stopSession()
+                    }
+
+                    Text("\(timer) s")
+                        .font(.nunito(18, weight: .bold))
+                        .foregroundStyle(.white)
+
+                    Text(status)
+                        .font(.nunito(16, weight: .semibold))
+                        .foregroundStyle(.white)
+
+                    HStack(spacing: 20) {
+                        Image("no-glasses-icon")
+                            .renderingMode(.template)
+                            .resizable()
+                            .foregroundStyle(.white)
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+
+
+                        Image("no-mask-icon")
+                            .renderingMode(.template)
+                            .resizable()
+                            .foregroundStyle(.white)
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+
+                        Image("no-hat-icon")
+                            .renderingMode(.template)
+                            .resizable()
+                            .foregroundStyle(.white)
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+
+                    }
+                    
+                    Button(action: {
+                        isMuted.toggle()
+                    }) {
+                        Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                            .font(.title2)
+                            .foregroundStyle(.white)
+                            .contentTransition(.symbolEffect(.replace))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 30)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(
+                    .ultraThinMaterial,
+                    in: RoundedRectangle(cornerRadius: 32, style: .continuous)
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+            }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+#Preview {
+    FaceIDScreenView(
+        timer: .constant(19),
+        status: .constant("No face detected")
+    )
+}

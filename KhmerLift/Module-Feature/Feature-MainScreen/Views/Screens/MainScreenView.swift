@@ -9,37 +9,51 @@ import SwiftUI
 
 struct MainScreenView: View {
     @State private var selectedTab: TabItem = .home
+    @State private var showAddScreen = true
     
     var body: some View {
-        ZStack {
-            Image("background")
-                .resizable()
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                Group {
-                    switch selectedTab {
-                    case .home:
-                        HomeScreenView()
-                    case .progress:
-                        Text("Progress View")
-                            .font(.nunito(24, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    case .more:
-                        Text("More View")
-                            .font(.nunito(24, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        
+        NavigationStack {
+            ZStack {
+                Image("background")
+                    .resizable()
+                    .ignoresSafeArea(.all)
                 
-                GlassTabBarView(selectedTab: $selectedTab)
-                    .padding(.bottom, 10)
+                VStack(spacing: 0) {
+                    Group {
+                        switch selectedTab {
+                        case .home:
+                            HomeScreenView()
+                            
+                        case .progress:
+                            Text("Progress View")
+                                .font(.nunito(24, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            
+                        case .more:
+                            MoreScreenView()
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    GlassTabBarView(
+                        selectedTab: $selectedTab,
+                        onAddTapped: {
+                            showAddScreen = true
+                        }
+                    )
+                    .padding(.bottom, 0)
+                }
+            }
+            .dismissKeyboardOnTap()
+            .navigationDestination(isPresented: $showAddScreen) {
+                FaceIDScreenView(
+                    timer: .constant(10),
+                    status: .constant("Looking for face...")
+                )
             }
         }
-        .dismissKeyboardOnTap()
     }
 }
 

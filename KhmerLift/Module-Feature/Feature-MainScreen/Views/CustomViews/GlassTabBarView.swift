@@ -56,7 +56,7 @@ struct GlassTabBarView: View {
             Button(action: {
                 onAddTapped?()
             }) {
-                Image(systemName: "plus")
+                Image(systemName: "camera")
                     .font(.system(size: 24, weight: .medium))
                     .foregroundColor(.white)
                     .frame(width: 64, height: 64)
