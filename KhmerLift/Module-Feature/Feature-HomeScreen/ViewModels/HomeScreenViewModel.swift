@@ -7,13 +7,13 @@
 
 import SwiftUI
 
+@MainActor
 @Observable
 final class HomeScreenViewModel {
     private let homeScreenService: HomeScreenServiceProtocol
     
     var title: String = "KhmerLift"
     
-    // MARK: - Body Weight
     var bodyWeight: Double = 0.0
     var bodyWeightString: String {
         get { bodyWeight == 0 ? "" : String(bodyWeight) }
@@ -27,7 +27,6 @@ final class HomeScreenViewModel {
         bodyWeight > 0
     }
     
-    // MARK: - Categories & Exercises
     var categories: [MuscleCategory] = []
     var selectedMuscle: MuscleCategory? {
         didSet {
@@ -68,7 +67,6 @@ final class HomeScreenViewModel {
         return "Previous: \(formattedWeight) kg × \(lastLog.repetition) reps"
     }
     
-    // MARK: - Weight & Repetition
     var weight: Double = 0.0
     var weightString: String {
         get { weight == 0 ? "" : String(weight) }
@@ -87,12 +85,9 @@ final class HomeScreenViewModel {
         }
     }
     
-    // MARK: - Toast / Feedback State
     var toastMessage: String?
     var isToastError: Bool = false
     
-    // MARK: - Initialization
-    @MainActor
     init(homeScreenService: HomeScreenServiceProtocol? = nil) {
         let service = homeScreenService ?? HomeScreenService()
         self.homeScreenService = service
@@ -100,8 +95,6 @@ final class HomeScreenViewModel {
         loadInitialDataAndPreFill()
     }
     
-    // MARK: - Private Helpers
-    @MainActor
     private func loadInitialDataAndPreFill() {
         self.categories = (try? homeScreenService.fetchCategories()) ?? []
         self.exercises = (try? homeScreenService.fetchExercises()) ?? []
@@ -140,7 +133,6 @@ final class HomeScreenViewModel {
         }
     }
     
-    // MARK: - User Actions
     func logBodyWeight() {
         guard bodyWeight > 0 else { return }
         do {
@@ -161,7 +153,6 @@ final class HomeScreenViewModel {
                 repetition: repetition
             )
             
-            // Refresh latest log for summary view
             self.latestExerciseLog = homeScreenService.fetchLatestExerciseLog(for: exercise.name)
             
             showToast("Logged \(exercise.name) (\(weight)kg x \(repetition) reps)")
@@ -198,7 +189,6 @@ final class HomeScreenViewModel {
         }
     }
     
-    @MainActor
     func showToast(_ message: String, isError: Bool = false) {
         withAnimation(.snappy) {
             self.toastMessage = message

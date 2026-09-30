@@ -46,7 +46,6 @@ struct GlassSwitchButtonView: View {
                     .environment(\.colorScheme, .dark)
             )
             .overlay(
-                // 3. Used strokeBorder so borders stay inside bounds without clipping
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(
                         LinearGradient(
@@ -64,7 +63,6 @@ struct GlassSwitchButtonView: View {
     }
 }
 
-// MARK: - Preview
 #Preview {
     struct GlassSwitchPreviewContainer: View {
         @State private var enableSound = true

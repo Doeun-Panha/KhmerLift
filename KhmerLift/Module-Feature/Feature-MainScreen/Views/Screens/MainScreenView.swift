@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainScreenView: View {
     @State private var selectedTab: TabItem = .home
-    @State private var showAddScreen = true
+    @State private var showAddScreen = false
     
     var body: some View {
         
@@ -26,10 +26,7 @@ struct MainScreenView: View {
                             HomeScreenView()
                             
                         case .progress:
-                            Text("Progress View")
-                                .font(.nunito(24, weight: .bold))
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            ProgressScreenView()
                             
                         case .more:
                             MoreScreenView()
