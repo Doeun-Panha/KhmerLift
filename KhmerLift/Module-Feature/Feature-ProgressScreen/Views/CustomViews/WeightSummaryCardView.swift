@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import Charts
 
 struct WeightSummaryCardView: View {
     let viewModel: ProgressScreenViewModel
@@ -67,11 +68,45 @@ struct WeightSummaryCardView: View {
                 
                 Spacer()
                 
-                Text("Graph")
-                    .font(.nunito(22, weight: .bold))
-                    .foregroundStyle(.white)
-                    .tracking(1)
+                if viewModel.summary.recentLogs.count >= 2 {
+                    Chart(viewModel.summary.recentLogs) { log in
+                        LineMark(
+                            x: .value("Date", log.date),
+                            y: .value("Weight", log.bodyWeight)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(Color.cyan)
+                        .lineStyle(StrokeStyle(lineWidth: 2.5))
+                        
+                        AreaMark(
+                            x: .value("Date", log.date),
+                            y: .value("Weight", log.bodyWeight)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: Color.cyan.opacity(0.35), location: 0.0),
+                                    .init(color: Color.cyan.opacity(0.175), location: 0.025),
+                                    .init(color: Color.cyan.opacity(0.00), location: 0.05)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                    }
+                    .chartXAxis(.hidden)
+                    .chartYAxis(.hidden)
+                    .chartYScale(domain: yDomain)
+                    .frame(height: 200)
+                    .clipped()
+                } else {
+                    Text("Not Enough Data")
+                        .font(.nunito(14, weight: .light))
+                        .foregroundStyle(.gray)
+                }
             }
+            
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
@@ -95,5 +130,19 @@ struct WeightSummaryCardView: View {
                     lineWidth: 1.0
                 )
         )
+    }
+    
+    private var yDomain: ClosedRange<Double> {
+        let weights = viewModel.summary.recentLogs.map(\.bodyWeight)
+        guard let minW = weights.min(), let maxW = weights.max() else {
+            return 50.0...100.0
+        }
+        
+        if minW == maxW {
+            return (minW - 2.0)...(maxW + 2.0)
+        }
+        
+        let padding = 1.5
+        return (minW - padding)...(maxW + padding)
     }
 }

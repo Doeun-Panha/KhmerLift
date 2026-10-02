@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MainScreenView: View {
-    @State private var selectedTab: TabItem = .progress
+    @State private var selectedTab: TabItem = .home
     @State private var showAddScreen = false
     
     var body: some View {

@@ -44,19 +44,21 @@ struct ProgressScreenView: View {
     }
     
     private var formContentView: some View {
-        VStack(spacing: 16) {
-            WeightSummaryCardView(
-                viewModel: viewModel,
-                onEditTap: {
-                    inputWeightGoal = viewModel.summary.targetWeight
-                    isEditingWeightSummary = true
-                }
-            )
-            
-            Spacer()
-        }
-        .onAppear {
-            viewModel.loadSummary()
+        ScrollView {
+            VStack(spacing: 16) {
+                WeightSummaryCardView(
+                    viewModel: viewModel,
+                    onEditTap: {
+                        inputWeightGoal = viewModel.summary.targetWeight
+                        isEditingWeightSummary = true
+                    }
+                )
+                
+                Spacer()
+            }
+            .onAppear {
+                viewModel.loadSummary()
+            }
         }
     }
 }

@@ -29,12 +29,15 @@ final class ProgressScreenViewModel {
         
         let changeResult = calculateMonthlyChange(from: logs)
         
+        let chartLogs = Array(logs.prefix(30).reversed())
+        
         self.summary = BodyWeightSummary(
             currentWeight: currentWeight,
             latestLogDate: latestLogDate,
             monthlyChange: changeResult?.change,
             comparisonDate: changeResult?.date,
-            targetWeight: targetWeight
+            targetWeight: targetWeight,
+            recentLogs: chartLogs
         )
     }
     
