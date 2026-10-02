@@ -112,10 +112,12 @@ struct HomeScreenView: View {
         VStack(spacing: 16) {
             HStack {
                 Spacer()
+                
                 Text("DAILY WEIGHT")
                     .font(.nunito(18, weight: .bold))
                     .foregroundStyle(.white)
                     .tracking(1)
+                
                 Spacer()
             }
             

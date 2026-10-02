@@ -10,7 +10,8 @@ import SwiftUI
 @MainActor
 @Observable
 final class HomeScreenViewModel {
-    private let homeScreenService: HomeScreenServiceProtocol
+    private let bodyWeightService: BodyWeightServiceProtocol
+    private let exerciseService: ExerciseServiceProtocol
     
     var title: String = "KhmerLift"
     
@@ -88,22 +89,30 @@ final class HomeScreenViewModel {
     var toastMessage: String?
     var isToastError: Bool = false
     
-    init(homeScreenService: HomeScreenServiceProtocol? = nil) {
-        let service = homeScreenService ?? HomeScreenService()
-        self.homeScreenService = service
+    init(
+        bodyWeightService: BodyWeightServiceProtocol? = nil,
+        exerciseService: ExerciseServiceProtocol? = nil
+    ) {
+        let bodyWeightService = bodyWeightService ?? BodyWeightService()
+        self.bodyWeightService = bodyWeightService
+
+        
+        let exerciseService = exerciseService ?? ExerciseService()
+        self.exerciseService = exerciseService
+
         
         loadInitialDataAndPreFill()
     }
     
     private func loadInitialDataAndPreFill() {
-        self.categories = (try? homeScreenService.fetchCategories()) ?? []
-        self.exercises = (try? homeScreenService.fetchExercises()) ?? []
+        self.categories = (try? exerciseService.fetchCategories()) ?? []
+        self.exercises = (try? exerciseService.fetchExercises()) ?? []
         
-        if let latestBodyWeight = homeScreenService.fetchLatestBodyWeight() {
+        if let latestBodyWeight = bodyWeightService.fetchLatestBodyWeight() {
             self.bodyWeight = latestBodyWeight
         }
         
-        if let lastLog = homeScreenService.fetchAllExerciseLogs().first,
+        if let lastLog = exerciseService.fetchAllExerciseLogs().first,
            let matchingExercise = exercises.first(where: { $0.name == lastLog.exercise }) {
             
             let parentCategory = categories.first(where: { $0.id == matchingExercise.categoryId })
@@ -121,7 +130,7 @@ final class HomeScreenViewModel {
             return
         }
         
-        let lastLog = homeScreenService.fetchLatestExerciseLog(for: exercise.name)
+        let lastLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
         self.latestExerciseLog = lastLog
         
         if let lastLog {
@@ -136,7 +145,7 @@ final class HomeScreenViewModel {
     func logBodyWeight() {
         guard bodyWeight > 0 else { return }
         do {
-            try homeScreenService.saveBodyWeight(bodyWeight)
+            try bodyWeightService.saveBodyWeight(bodyWeight)
             showToast("Body weight saved!")
         } catch {
             showToast("Failed to save body weight.", isError: true)
@@ -147,13 +156,13 @@ final class HomeScreenViewModel {
         guard weight > 0, repetition > 0, let exercise = selectedExercise else { return }
         
         do {
-            try homeScreenService.saveExerciseLog(
+            try exerciseService.saveExerciseLog(
                 exercise: exercise.name,
                 weight: weight,
                 repetition: repetition
             )
             
-            self.latestExerciseLog = homeScreenService.fetchLatestExerciseLog(for: exercise.name)
+            self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
             
             showToast("Logged \(exercise.name) (\(weight)kg x \(repetition) reps)")
         } catch {
@@ -167,8 +176,8 @@ final class HomeScreenViewModel {
         
         let newCategory = MuscleCategory(name: trimmedName)
         do {
-            try homeScreenService.saveCategory(newCategory)
-            self.categories = (try? homeScreenService.fetchCategories()) ?? []
+            try exerciseService.saveCategory(newCategory)
+            self.categories = (try? exerciseService.fetchCategories()) ?? []
             self.selectedMuscle = categories.first(where: { $0.id == newCategory.id })
         } catch {
             print("Failed to save category: \(error)")
@@ -181,8 +190,8 @@ final class HomeScreenViewModel {
         
         let newExercise = Exercise(categoryId: targetCategory.id, name: trimmedName)
         do {
-            try homeScreenService.saveExercise(newExercise)
-            self.exercises = (try? homeScreenService.fetchExercises()) ?? []
+            try exerciseService.saveExercise(newExercise)
+            self.exercises = (try? exerciseService.fetchExercises()) ?? []
             self.selectedExercise = exercises.first(where: { $0.id == newExercise.id })
         } catch {
             print("Failed to save exercise: \(error)")

@@ -1,19 +1,15 @@
 //
-//  HomeScreenService.swift
+//  ExerciseService.swift
 //  KhmerLift
 //
-//  Created by Panha on 28/9/26.
+//  Created by Panha on 1/10/26.
 //
 
 import SwiftData
 import Foundation
 
 @MainActor
-protocol HomeScreenServiceProtocol: AnyObject {
-    func saveBodyWeight(_ weight: Double) throws
-    func fetchLatestBodyWeight() -> Double?
-    func fetchAllBodyWeightLogs() -> [BodyWeightLog]
-    
+protocol ExerciseServiceProtocol: AnyObject {
     func saveExerciseLog(exercise: String, weight: Double, repetition: Int) throws
     func fetchLatestExerciseLog(for exercise: String) -> ExerciseLog?
     func fetchAllExerciseLogs() -> [ExerciseLog]
@@ -26,7 +22,7 @@ protocol HomeScreenServiceProtocol: AnyObject {
 }
 
 @MainActor
-final class HomeScreenService: HomeScreenServiceProtocol {
+final class ExerciseService: ExerciseServiceProtocol {
     private let modelContainer: ModelContainer
     private let context: ModelContext
     
@@ -41,44 +37,7 @@ final class HomeScreenService: HomeScreenServiceProtocol {
 //            print("📍 SwiftData Database Path: \(url.path)")
 //        }
     }
-        
-    func saveBodyWeight(_ weight: Double) throws {
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: Date())
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
-        
-        var descriptor = FetchDescriptor<BodyWeightLog>(
-            predicate: #Predicate { $0.date >= startOfDay && $0.date < endOfDay }
-        )
-        descriptor.fetchLimit = 1
-        
-        if let todayLog = try context.fetch(descriptor).first {
-            todayLog.bodyWeight = weight
-            todayLog.date = Date()
-        } else {
-            let newLog = BodyWeightLog(bodyWeight: weight)
-            context.insert(newLog)
-        }
-        
-        try context.save()
-    }
-
-    func fetchLatestBodyWeight() -> Double? {
-        var descriptor = FetchDescriptor<BodyWeightLog>(
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-        descriptor.fetchLimit = 1
-        
-        return try? context.fetch(descriptor).first?.bodyWeight
-    }
-
-    func fetchAllBodyWeightLogs() -> [BodyWeightLog] {
-        let descriptor = FetchDescriptor<BodyWeightLog>(
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-        return (try? context.fetch(descriptor)) ?? []
-    }
-        
+    
     func saveExerciseLog(exercise: String, weight: Double, repetition: Int) throws {
         let newLog = ExerciseLog(
             exercise: exercise,
@@ -155,22 +114,4 @@ final class HomeScreenService: HomeScreenServiceProtocol {
         
         try context.save()
     }
-}
-
-final class SwiftDataContainer: Sendable {
-    static let shared: ModelContainer = {
-        let schema = Schema([
-            BodyWeightLog.self,
-            ExerciseLog.self,
-            MuscleCategory.self,
-            Exercise.self
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
 }

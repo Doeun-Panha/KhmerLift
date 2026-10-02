@@ -10,35 +10,26 @@ import SwiftData
 
 @MainActor
 protocol ProgressScreenServiceProtocol: AnyObject {
-    func fetchBodyWeightSummary() -> BodyWeightSummary
+    func saveTargetWeight(_ weight: Double)
+    func fetchTargetWeight() -> Double
 }
 
 @MainActor
 final class ProgressScreenService: ProgressScreenServiceProtocol {
     private let context: ModelContext
+    private let targetWeightKey = "targetBodyWeight"
     
     init(modelContainer: ModelContainer? = nil) {
         let container = modelContainer ?? SwiftDataContainer.shared
         self.context = container.mainContext
     }
     
-    func fetchBodyWeightSummary() -> BodyWeightSummary {
-        let descriptor = FetchDescriptor<BodyWeightLog>(
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-        let logs = (try? context.fetch(descriptor)) ?? []
-        
-        let current = logs.first?.bodyWeight
-        
-        var monthlyChange: Double? = nil
-        let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        
-        if let latestWeight = current, let previousLog = logs.first(where: { $0.date <= thirtyDaysAgo}) {
-            monthlyChange = latestWeight - previousLog.bodyWeight
-        }
-        
-        let targetWeight = 80.0
-        
-        return BodyWeightSummary(currentWeight: current, monthlyChange: monthlyChange, targetWeight: targetWeight)
+    func saveTargetWeight(_ weight: Double) {
+        UserDefaults.standard.set(weight, forKey: targetWeightKey)
+    }
+    
+    func fetchTargetWeight() -> Double {
+        let saved = UserDefaults.standard.double(forKey: targetWeightKey)
+        return saved > 0 ? saved : 55.0
     }
 }
