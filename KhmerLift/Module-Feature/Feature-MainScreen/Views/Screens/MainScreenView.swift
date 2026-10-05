@@ -19,6 +19,9 @@ struct MainScreenView: View {
                     .resizable()
                     .ignoresSafeArea(.all)
                 
+                VideoBackgroundView(name: "bike-video", type: "mp4")
+                                .ignoresSafeArea()
+                
                 VStack(spacing: 0) {
                     Group {
                         switch selectedTab {
@@ -44,12 +47,12 @@ struct MainScreenView: View {
                 }
             }
             .dismissKeyboardOnTap()
-            .navigationDestination(isPresented: $showAddScreen) {
-                FaceIDScreenView(
-                    timer: .constant(10),
-                    status: .constant("Looking for face...")
-                )
-            }
+//            .navigationDestination(isPresented: $showAddScreen) {
+//                FaceIDScreenView(
+//                    timer: .constant(10),
+//                    status: .constant("Looking for face...")
+//                )
+//            }
         }
     }
 }

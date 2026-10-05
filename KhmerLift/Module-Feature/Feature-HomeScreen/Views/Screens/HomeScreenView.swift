@@ -142,14 +142,7 @@ struct HomeScreenView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12.5)
-                    .background(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .fill(viewModel.isBodyWeightValid ? Color(red: 0.35, green: 0.65, blue: 1.0) : Color.gray.opacity(0.4))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .stroke(Color.black.opacity(0.25), lineWidth: 1)
-                    )
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
             }
             .buttonStyle(.plain)
             .disabled(!viewModel.isBodyWeightValid)
@@ -227,14 +220,7 @@ struct HomeScreenView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12.5)
-                    .background(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .fill(viewModel.isExerciseSetValid ? Color(red: 0.35, green: 0.65, blue: 1.0) : Color.gray.opacity(0.4))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .stroke(Color.black.opacity(0.25), lineWidth: 1)
-                    )
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
             }
             .buttonStyle(.plain)
             .disabled(!viewModel.isExerciseSetValid)

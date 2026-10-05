@@ -33,7 +33,7 @@ struct WeightSummaryCardView: View {
                         Text(viewModel.formattedCurrentTitle)
                             .font(.nunito(16, weight: .light))
                             .fontWeight(.bold)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(.white.opacity(0.75))
                         
                         Text(viewModel.formattedCurrentWeight)
                             .font(.nunito(22, weight: .semibold))
@@ -45,7 +45,7 @@ struct WeightSummaryCardView: View {
                         Text("Goal")
                             .font(.nunito(16, weight: .light))
                             .fontWeight(.bold)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(.white.opacity(0.75))
                         
                         Text(viewModel.formattedTargetWeight)
                             .font(.nunito(22, weight: .semibold))
@@ -57,7 +57,7 @@ struct WeightSummaryCardView: View {
                         Text(viewModel.formattedChangeTitle)
                             .font(.nunito(16, weight: .light))
                             .fontWeight(.bold)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(.white.opacity(0.75))
                         
                         Text(viewModel.formattedMonthlyChange)
                             .font(.nunito(22, weight: .semibold))
@@ -110,26 +110,7 @@ struct WeightSummaryCardView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(
-            ZStack {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color.black.opacity(0.10))
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .environment(\.colorScheme, .dark)
-            }
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        colors: [.white.opacity(0.3), .white.opacity(0.05)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.0
-                )
-        )
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
     
     private var yDomain: ClosedRange<Double> {

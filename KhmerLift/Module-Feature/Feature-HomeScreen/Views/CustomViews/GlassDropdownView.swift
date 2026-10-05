@@ -50,31 +50,12 @@ struct GlassDropdownView<T: SelectableItem>: View {
                     
                     Spacer()
                     
-                    Image(systemName: "chevron.up.chevron.down")
+                    Image(systemName: "chevron.down")
                         .font(.nunito(16, weight: .semibold))
                         .foregroundStyle(.white)
                 }
                 .padding()
-                .background(
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .fill(Color.black.opacity(0.10))
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                            .environment(\.colorScheme, .dark)
-                    }
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 32, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.3), .white.opacity(0.05)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.0
-                        )
-                )
+                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
             }
             .disabled(isDisabled)
             .opacity(isDisabled ? 0.5 : 1.0)
@@ -117,10 +98,6 @@ struct GlassDropdownView<T: SelectableItem>: View {
                                     }
                                 }
                                 .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .fill(selection == item ? Color.white.opacity(0.12) : Color.clear)
-                                )
                             }
                         }
                     }
@@ -141,24 +118,14 @@ struct GlassDropdownView<T: SelectableItem>: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Capsule().fill(Color.cyan))
                     }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 16)
             }
             .frame(maxWidth: .infinity)
             .ignoresSafeArea(.all, edges: .horizontal)
             .presentationDetents([.medium, .fraction(0.7)])
-            .presentationCornerRadius(36)
-            .presentationBackground {
-                ZStack {
-                    Color.black.opacity(0.4)
-                    Rectangle()
-                        .fill(.ultraThinMaterial)
-                        .environment(\.colorScheme, .dark)
-                }
-            }
         }
     }
 }

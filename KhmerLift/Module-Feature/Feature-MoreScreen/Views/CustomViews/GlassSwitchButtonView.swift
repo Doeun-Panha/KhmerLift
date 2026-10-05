@@ -33,7 +33,6 @@ struct GlassSwitchButtonView: View {
                 Toggle("", isOn: $isOn)
                     .labelsHidden()
                     .tint(Color(red: 0.35, green: 0.65, blue: 1.0))
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
