@@ -33,38 +33,14 @@ struct GlassSwitchButtonView: View {
                 Toggle("", isOn: $isOn)
                     .labelsHidden()
                     .tint(Color(red: 0.35, green: 0.65, blue: 1.0))
-                    .background(
-                        .ultraThinMaterial,
-                        in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    )
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .environment(\.colorScheme, .dark)
-            )
-            .overlay(
-                // 3. Used strokeBorder so borders stay inside bounds without clipping
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [
-                                isFocused ? .cyan.opacity(0.8) : .white.opacity(0.3),
-                                .white.opacity(0.05)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: isFocused ? 1.5 : 1.0
-                    )
-            )
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         }
     }
 }
 
-// MARK: - Preview
 #Preview {
     struct GlassSwitchPreviewContainer: View {
         @State private var enableSound = true

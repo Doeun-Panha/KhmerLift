@@ -32,7 +32,6 @@ struct CameraPreview: UIViewRepresentable {
     func updateUIView(_ uiView: VideoPreviewView, context: Context) {}
 }
 
-// 2. Simple Camera Manager to handle setup & permissions
 class CameraManager: ObservableObject {
     @Published var session = AVCaptureSession()
     
@@ -57,7 +56,6 @@ class CameraManager: ObservableObject {
         guard !session.isRunning else { return }
         
         session.beginConfiguration()
-        // Configure front camera
         if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
            let input = try? AVCaptureDeviceInput(device: device) {
             if session.canAddInput(input) {

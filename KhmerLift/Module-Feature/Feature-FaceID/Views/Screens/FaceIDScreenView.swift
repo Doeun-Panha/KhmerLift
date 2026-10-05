@@ -21,8 +21,11 @@ struct FaceIDScreenView: View {
         ZStack {
             Image("background")
                 .resizable()
-                .ignoresSafeArea()
-
+                .ignoresSafeArea(.all)
+            
+            VideoBackgroundView(name: "bike-video", type: "mp4")
+                            .ignoresSafeArea()
+            
             VStack(spacing: 16) {
                 HStack(spacing: 12) {
                     Button(action: { dismiss() }) {
@@ -30,10 +33,11 @@ struct FaceIDScreenView: View {
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(width: 44, height: 44)
-                            .background(Color.white.opacity(0.2))
                             .clipShape(Circle())
+                            .contentShape(Circle())
                     }
                     .buttonStyle(.plain)
+                    .glassEffect(.clear)
 
                     Text("Verify Face")
                         .font(.nunito(22, weight: .bold))
@@ -41,11 +45,15 @@ struct FaceIDScreenView: View {
 
                     Spacer()
 
-                    Image("logo-icon")
-                        .renderingMode(.original)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 36, height: 36)
+                    Button(action: { dismiss() }) {
+                        Image("logo-icon")
+                            .resizable()
+                            .renderingMode(.original)
+                            .scaledToFit()
+                            .frame(width: 44, height: 44)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 16)
 
@@ -59,9 +67,9 @@ struct FaceIDScreenView: View {
                             .stroke(Color.white.opacity(0.3), lineWidth: 3)
                             .frame(width: 275, height: 275)
 
-                        Image(systemName: "person.crop.artframe")
-                            .font(.system(size: 80))
-                            .foregroundStyle(.white.opacity(0.25))
+//                        Image(systemName: "person.crop.artframe")
+//                            .font(.system(size: 80))
+//                            .foregroundStyle(.white.opacity(0.25))
                     }
                     .padding(.top, 30)
                     .padding(.bottom, 20)
@@ -109,9 +117,12 @@ struct FaceIDScreenView: View {
                         isMuted.toggle()
                     }) {
                         Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                            .font(.title2)
+                            .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                             .contentTransition(.symbolEffect(.replace))
+                            .frame(width: 48, height: 48)
+                            .clipShape(Circle())
+                            .contentShape(Circle())
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 30)
@@ -120,13 +131,11 @@ struct FaceIDScreenView: View {
                 }
                 .padding(.horizontal, 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(
-                    .ultraThinMaterial,
-                    in: RoundedRectangle(cornerRadius: 32, style: .continuous)
-                )
+                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
+            
         }
         .toolbar(.hidden, for: .navigationBar)
     }

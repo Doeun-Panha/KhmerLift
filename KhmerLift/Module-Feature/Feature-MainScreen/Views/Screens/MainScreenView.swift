@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainScreenView: View {
     @State private var selectedTab: TabItem = .home
-    @State private var showAddScreen = true
+    @State private var showAddScreen = false
     
     var body: some View {
         
@@ -19,6 +19,9 @@ struct MainScreenView: View {
                     .resizable()
                     .ignoresSafeArea(.all)
                 
+                VideoBackgroundView(name: "bike-video", type: "mp4")
+                                .ignoresSafeArea()
+                
                 VStack(spacing: 0) {
                     Group {
                         switch selectedTab {
@@ -26,10 +29,7 @@ struct MainScreenView: View {
                             HomeScreenView()
                             
                         case .progress:
-                            Text("Progress View")
-                                .font(.nunito(24, weight: .bold))
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            ProgressScreenView()
                             
                         case .more:
                             MoreScreenView()
@@ -47,12 +47,12 @@ struct MainScreenView: View {
                 }
             }
             .dismissKeyboardOnTap()
-            .navigationDestination(isPresented: $showAddScreen) {
-                FaceIDScreenView(
-                    timer: .constant(10),
-                    status: .constant("Looking for face...")
-                )
-            }
+//            .navigationDestination(isPresented: $showAddScreen) {
+//                FaceIDScreenView(
+//                    timer: .constant(10),
+//                    status: .constant("Looking for face...")
+//                )
+//            }
         }
     }
 }

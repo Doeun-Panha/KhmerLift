@@ -7,11 +7,10 @@
 
 import SwiftUI
 
-// MARK: - Display Models
 enum DisplayState {
-    case compact      // Narrow / Outer screen layout
-    case expanded     // Wide / Unfolded inner screen layout
-    case splitView    // Multitasking / Side-by-side app layout
+    case compact
+    case expanded
+    case splitView
 }
 
 struct DisplayLayoutInfo {
@@ -20,13 +19,11 @@ struct DisplayLayoutInfo {
     let state: DisplayState
     let isLandscape: Bool
     
-    /// Returns true if screen is wide enough for dual-pane views
     var isMultiColumn: Bool {
         state == .expanded || size.width > 700
     }
 }
 
-// MARK: - View Modifier
 private struct DisplayLayoutObserver: ViewModifier {
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
@@ -63,9 +60,7 @@ private struct DisplayLayoutObserver: ViewModifier {
     }
 }
 
-// MARK: - View Extension
 extension View {
-    /// Observes display state, geometry, and posture shifts dynamically.
     func onDisplayLayoutChange(perform action: @escaping (DisplayLayoutInfo) -> Void) -> some View {
         self.modifier(DisplayLayoutObserver(onChange: action))
     }
