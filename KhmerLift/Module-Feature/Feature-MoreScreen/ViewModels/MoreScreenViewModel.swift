@@ -1,8 +1,3 @@
-//
-//  MoreScreenViewModel.swift
-//  KhmerLift
-//
-
 import SwiftUI
 import Observation
 
@@ -10,17 +5,12 @@ import Observation
 @Observable
 final class MoreScreenViewModel {
     private let biometricService: BiometricServiceProtocol
+    private let faceIDKey = "isFaceIDEnabled"
     
     var enableFaceID: Bool = false
     var navigateToFaceID: Bool = false
-    
     var showSettingsAlert: Bool = false
     var toast: ToastConfig? = nil
-    
-    var faceIDTimer: Int = 30
-    var faceIDStatus: String = "Authenticating..."
-    
-    private let faceIDKey = "isFaceIDEnabled"
     
     init(
         biometricService: BiometricServiceProtocol? = nil
@@ -87,7 +77,7 @@ final class MoreScreenViewModel {
             tintColor: .green
         )
     }
-        
+    
     func showToast(message: String, icon: String? = "info.circle.fill", tintColor: Color = .blue) {
         let config = ToastConfig(message: message, icon: icon, tintColor: tintColor)
         self.toast = config

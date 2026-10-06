@@ -6,12 +6,12 @@
 //
 
 import Foundation
-import LocalAuthentication
 import Combine
 
 @MainActor
 final class FaceIDViewModel: ObservableObject {
     private let biometricService: BiometricServiceProtocol
+    let cameraManager = CameraManager()
     
     @Published var timer: Int
     @Published var status: String
@@ -19,25 +19,20 @@ final class FaceIDViewModel: ObservableObject {
     @Published var isAuthenticated: Bool = false
     @Published var shouldDismiss: Bool = false
     
-    let cameraManager = CameraManager()
     var onSuccess: (() -> Void)?
     var onFailure: (() -> Void)?
     
     init(
         biometricService: BiometricServiceProtocol? = nil,
-        
         initialTimer: Int = 19,
         initialStatus: String = "No face detected",
-        
         onSuccess: (() -> Void)? = nil,
         onFailure: (() -> Void)? = nil
     ) {
         let biometricService = biometricService ?? BiometricService()
         self.biometricService = biometricService
-        
         self.timer = initialTimer
         self.status = initialStatus
-        
         self.onSuccess = onSuccess
         self.onFailure = onFailure
     }
@@ -60,25 +55,20 @@ final class FaceIDViewModel: ObservableObject {
     private func authenticateWithFaceID() async {
         try? await Task.sleep(for: .seconds(1))
         
-        let context = LAContext()
-        var error: NSError?
-        
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+        guard biometricService.checkFaceIDStatus() == .available else {
             status = "Face ID unavailable"
             handleCancel()
             return
         }
         
         do {
-            let success = try await context.evaluatePolicy(
-                .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: "Verify Face ID to enable security feature."
+            let success = try await biometricService.authenticate(
+                reason: "Verify Face ID to enable security feature."
             )
             
             if success {
                 isAuthenticated = true
                 status = "Verification Successful"
-                
                 try? await Task.sleep(for: .seconds(1))
                 onSuccess?()
                 shouldDismiss = true

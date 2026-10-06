@@ -39,6 +39,7 @@ class CameraManager: ObservableObject {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             setupCamera()
+            
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 if granted {
@@ -47,6 +48,7 @@ class CameraManager: ObservableObject {
                     }
                 }
             }
+            
         default:
             break
         }

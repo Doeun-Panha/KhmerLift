@@ -15,6 +15,7 @@ enum FaceIDStatus {
 
 protocol BiometricServiceProtocol {
     func checkFaceIDStatus() -> FaceIDStatus
+    func authenticate(reason: String) async throws -> Bool
 }
 
 final class BiometricService: BiometricServiceProtocol {
@@ -30,5 +31,10 @@ final class BiometricService: BiometricServiceProtocol {
         }
         
         return context.biometryType == .faceID ? .available : .notAvailable
+    }
+    
+    func authenticate(reason: String) async throws -> Bool {
+        let context = LAContext()
+        return try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
     }
 }

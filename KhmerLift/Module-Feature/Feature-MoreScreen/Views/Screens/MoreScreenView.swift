@@ -41,8 +41,6 @@ struct MoreScreenView: View {
             .padding(.leading, 10)
             .navigationDestination(isPresented: $viewModel.navigateToFaceID) {
                 FaceIDScreenView(
-                    timer: viewModel.faceIDTimer,
-                    status: viewModel.faceIDStatus,
                     onSuccess: {
                         viewModel.confirmFaceIDSetupSuccess()
                     },
