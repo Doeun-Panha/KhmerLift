@@ -9,13 +9,21 @@ import SwiftUI
 
 struct FaceIDScreenView: View {
     @Environment(\.dismiss) private var dismiss
-    
-    @StateObject private var cameraManager = CameraManager()
+    @StateObject private var viewModel: FaceIDViewModel
 
-    @Binding var timer: Int
-    @Binding var status: String
-    
-    @State private var isMuted: Bool = false
+    init(
+        timer: Int = 19,
+        status: String = "No face detected",
+        onSuccess: (() -> Void)? = nil,
+        onFailure: (() -> Void)? = nil
+    ) {
+        _viewModel = StateObject(wrappedValue: FaceIDViewModel(
+            initialTimer: timer,
+            initialStatus: status,
+            onSuccess: onSuccess,
+            onFailure: onFailure
+        ))
+    }
 
     var body: some View {
         ZStack {
@@ -24,7 +32,7 @@ struct FaceIDScreenView: View {
                 .ignoresSafeArea(.all)
             
             VideoBackgroundView(name: "bike-video", type: "mp4")
-                            .ignoresSafeArea()
+                .ignoresSafeArea()
             
             VStack(spacing: 16) {
                 HStack(spacing: 12) {
@@ -59,32 +67,22 @@ struct FaceIDScreenView: View {
 
                 VStack(spacing: 30) {
                     ZStack {
-                        CameraPreview(session: cameraManager.session)
+                        CameraPreview(session: viewModel.cameraManager.session)
                             .frame(width: 275, height: 275)
                             .clipShape(Circle())
 
                         Circle()
                             .stroke(Color.white.opacity(0.3), lineWidth: 3)
                             .frame(width: 275, height: 275)
-
-//                        Image(systemName: "person.crop.artframe")
-//                            .font(.system(size: 80))
-//                            .foregroundStyle(.white.opacity(0.25))
                     }
                     .padding(.top, 30)
                     .padding(.bottom, 20)
-                    .onAppear {
-                        cameraManager.checkPermissionAndStart()
-                    }
-                    .onDisappear {
-                        cameraManager.stopSession()
-                    }
 
-                    Text("\(timer) s")
+                    Text("\(viewModel.timer) s")
                         .font(.nunito(18, weight: .bold))
                         .foregroundStyle(.white)
 
-                    Text(status)
+                    Text(viewModel.status)
                         .font(.nunito(16, weight: .semibold))
                         .foregroundStyle(.white)
 
@@ -95,7 +93,6 @@ struct FaceIDScreenView: View {
                             .foregroundStyle(.white)
                             .scaledToFit()
                             .frame(width: 50, height: 50)
-
 
                         Image("no-mask-icon")
                             .renderingMode(.template)
@@ -110,13 +107,10 @@ struct FaceIDScreenView: View {
                             .foregroundStyle(.white)
                             .scaledToFit()
                             .frame(width: 50, height: 50)
-
                     }
                     
-                    Button(action: {
-                        isMuted.toggle()
-                    }) {
-                        Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                    Button(action: { viewModel.toggleMute() }) {
+                        Image(systemName: viewModel.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                             .contentTransition(.symbolEffect(.replace))
@@ -135,15 +129,25 @@ struct FaceIDScreenView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
-            
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.onViewAppear()
+        }
+        .onDisappear {
+            viewModel.onViewDisappear()
+        }
+        .onChange(of: viewModel.shouldDismiss) { _, shouldDismiss in
+            if shouldDismiss {
+                dismiss()
+            }
+        }
     }
 }
 
 #Preview {
     FaceIDScreenView(
-        timer: .constant(19),
-        status: .constant("No face detected")
+        timer: 19,
+        status: "No face detected"
     )
 }

@@ -49,6 +49,10 @@ struct GlassTextFieldView: View {
                 }
             }
             .padding()
+            .contentShape(Rectangle())
+            .onTapGesture {
+                isFocused = true
+            }
             .glassEffect(.clear, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         }
     }

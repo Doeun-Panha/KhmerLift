@@ -40,6 +40,7 @@ struct MainScreenView: View {
                     GlassTabBarView(
                         selectedTab: $selectedTab,
                         onAddTapped: {
+                            dismissKeyboard()
                             showAddScreen = true
                         }
                     )
@@ -47,12 +48,9 @@ struct MainScreenView: View {
                 }
             }
             .dismissKeyboardOnTap()
-//            .navigationDestination(isPresented: $showAddScreen) {
-//                FaceIDScreenView(
-//                    timer: .constant(10),
-//                    status: .constant("Looking for face...")
-//                )
-//            }
+            .onChange(of: selectedTab) { _, _ in
+                dismissKeyboard()
+            }
         }
     }
 }

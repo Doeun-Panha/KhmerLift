@@ -77,6 +77,7 @@ struct GlassTabBarView: View {
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
+                            dismissKeyboard()
                             isDragging = true
                             touchX = value.location.x
                         }
