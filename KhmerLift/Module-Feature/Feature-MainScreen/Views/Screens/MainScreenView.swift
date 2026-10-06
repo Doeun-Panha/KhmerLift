@@ -8,23 +8,21 @@
 import SwiftUI
 
 struct MainScreenView: View {
-    @State private var selectedTab: TabItem = .home
-    @State private var showAddScreen = false
+    @State private var viewModel = MainScreenViewModel()
     
     var body: some View {
-        
         NavigationStack {
             ZStack {
                 Image("background")
                     .resizable()
                     .ignoresSafeArea(.all)
                 
-                VideoBackgroundView(name: "bike-video", type: "mp4")
-                                .ignoresSafeArea()
+                VideoBackgroundView(name: viewModel.selectedBackgroundFileName, type: "mp4")
+                    .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     Group {
-                        switch selectedTab {
+                        switch viewModel.selectedTab {
                         case .home:
                             HomeScreenView()
                             
@@ -38,19 +36,15 @@ struct MainScreenView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     
                     GlassTabBarView(
-                        selectedTab: $selectedTab,
+                        selectedTab: $viewModel.selectedTab,
                         onAddTapped: {
-                            dismissKeyboard()
-                            showAddScreen = true
+                            viewModel.handleAddTapped()
                         }
                     )
                     .padding(.bottom, 0)
                 }
             }
             .dismissKeyboardOnTap()
-            .onChange(of: selectedTab) { _, _ in
-                dismissKeyboard()
-            }
         }
     }
 }

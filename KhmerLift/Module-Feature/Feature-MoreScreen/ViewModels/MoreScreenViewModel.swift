@@ -6,11 +6,28 @@ import Observation
 final class MoreScreenViewModel {
     private let biometricService: BiometricServiceProtocol
     private let faceIDKey = "isFaceIDEnabled"
+    private let selectedBackgroundKey = "selectedBackgroundFileName"
     
     var enableFaceID: Bool = false
     var navigateToFaceID: Bool = false
     var showSettingsAlert: Bool = false
     var toast: ToastConfig? = nil
+    
+    let availableBackgrounds: [BackgroundModel] = [
+        BackgroundModel(id: "bike-video", name: "Bike", fileName: "bike-video", fileType: "mp4"),
+        BackgroundModel(id: "bike-nature-video", name: "Bike Nature", fileName: "bike-nature-video", fileType: "mp4"),
+        BackgroundModel(id: "berserker-nature-video", name: "Berserker", fileName: "berserker-nature-video", fileType: "mp4"),
+        BackgroundModel(id: "blackhole-video", name: "Blackhole", fileName: "blackhole-video", fileType: "mp4"),
+        BackgroundModel(id: "cycling-sunset-video", name: "Cycling Sunset", fileName: "cycling-sunset-video", fileType: "mp4"),
+    ]
+    
+    var selectedBackground: BackgroundModel? {
+        didSet {
+            if let selectedBackground {
+                UserDefaults.standard.set(selectedBackground.fileName, forKey: selectedBackgroundKey)
+            }
+        }
+    }
     
     init(
         biometricService: BiometricServiceProtocol? = nil
@@ -19,6 +36,9 @@ final class MoreScreenViewModel {
         self.biometricService = biometricService
         
         self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
+        
+        let savedFileName = UserDefaults.standard.string(forKey: selectedBackgroundKey) ?? "bike-video"
+        self.selectedBackground = availableBackgrounds.first(where: { $0.fileName == savedFileName }) ?? availableBackgrounds.first
     }
     
     func handleFaceIDToggleChange(_ isEnabled: Bool) {

@@ -31,7 +31,7 @@ struct FaceIDScreenView: View {
                 .resizable()
                 .ignoresSafeArea(.all)
             
-            VideoBackgroundView(name: "bike-video", type: "mp4")
+            VideoBackgroundView(name: viewModel.selectedBackgroundFileName, type: "mp4")
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {

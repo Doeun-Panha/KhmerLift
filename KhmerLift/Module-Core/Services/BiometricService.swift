@@ -7,19 +7,21 @@
 
 import LocalAuthentication
 
-enum FaceIDStatus {
+public enum FaceIDStatus {
     case available
     case notEnrolled
     case notAvailable
 }
 
-protocol BiometricServiceProtocol {
+public protocol BiometricServiceProtocol {
     func checkFaceIDStatus() -> FaceIDStatus
     func authenticate(reason: String) async throws -> Bool
 }
 
-final class BiometricService: BiometricServiceProtocol {
-    func checkFaceIDStatus() -> FaceIDStatus {
+public final class BiometricService: BiometricServiceProtocol {
+    public init() {}
+    
+    public func checkFaceIDStatus() -> FaceIDStatus {
         let context = LAContext()
         var error: NSError?
         
@@ -33,7 +35,7 @@ final class BiometricService: BiometricServiceProtocol {
         return context.biometryType == .faceID ? .available : .notAvailable
     }
     
-    func authenticate(reason: String) async throws -> Bool {
+    public func authenticate(reason: String) async throws -> Bool {
         let context = LAContext()
         return try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
     }

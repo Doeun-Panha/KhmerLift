@@ -97,17 +97,17 @@ struct GlassTabBarView: View {
             .padding(.horizontal, 4)
             .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 64, style: .continuous))
             
-            Button(action: {
-                onAddTapped?()
-            }) {
-                Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(.white)
-                    .frame(width: 68, height: 68)
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .glassEffect(.clear, in: Circle())
+//            Button(action: {
+//                onAddTapped?()
+//            }) {
+//                Image(systemName: "plus")
+//                    .font(.system(size: 24, weight: .medium))
+//                    .foregroundColor(.white)
+//                    .frame(width: 68, height: 68)
+//                    .contentShape(Circle())
+//            }
+//            .buttonStyle(.plain)
+//            .glassEffect(.clear, in: Circle())
         }
         .padding(.horizontal)
     }
