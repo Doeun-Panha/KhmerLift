@@ -393,6 +393,7 @@
 				INFOPLIST_FILE = "KhmerLift/Module-Core/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "KhmerLift requires camera access for face verification.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Verify your identity to secure your information.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -429,6 +430,7 @@
 				INFOPLIST_FILE = "KhmerLift/Module-Core/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "KhmerLift requires camera access for face verification.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Verify your identity to secure your information.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

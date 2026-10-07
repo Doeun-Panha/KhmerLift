@@ -9,7 +9,7 @@ import SwiftUI
 
 struct GlassSwitchButtonView: View {
     let cornerRadius: CGFloat = 32.0
-    let title: String
+    var title: String? = nil
     let name: String
     
     @Binding var isOn: Bool
@@ -18,11 +18,13 @@ struct GlassSwitchButtonView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.nunito(16, weight: .semibold))
-                .fontWeight(.bold)
-                .foregroundStyle(.white)
-
+            if let title {
+                Text(title)
+                    .font(.nunito(16, weight: .semibold))
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+            }
+            
             HStack {
                 Text(name)
                     .font(.nunito(16, weight: .semibold))

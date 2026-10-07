@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Observation
 
 @MainActor
 @Observable
@@ -14,6 +15,13 @@ final class HomeScreenViewModel {
     private let exerciseService: ExerciseServiceProtocol
     
     var title: String = "KhmerLift"
+    var streakCount: Int = 0
+    
+    var isAddingCategory: Bool = false
+    var newCategoryName: String = ""
+    
+    var isAddingExercise: Bool = false
+    var newExerciseName: String = ""
     
     var bodyWeight: Double = 0.0
     var bodyWeightString: String {
@@ -22,10 +30,6 @@ final class HomeScreenViewModel {
             if let parsed = Double(newValue) { bodyWeight = parsed }
             else if newValue.isEmpty { bodyWeight = 0.0 }
         }
-    }
-    
-    var isBodyWeightValid: Bool {
-        bodyWeight > 0
     }
     
     var categories: [MuscleCategory] = []
@@ -54,8 +58,17 @@ final class HomeScreenViewModel {
         return exercises.filter { $0.categoryId == selectedMuscle.id }
     }
     
-    var isExerciseSetValid: Bool {
-        selectedExercise != nil && weight > 0 && repetition > 0
+    var isExerciseDropdownDisabled: Bool {
+        selectedMuscle == nil
+    }
+    
+    var exercisePlaceholderText: String {
+        selectedMuscle == nil ? "Select Muscle First" : "Select Exercise"
+    }
+    
+    var addExerciseAlertMessage: String {
+        guard let selectedMuscle else { return "" }
+        return "Adding new exercise under '\(selectedMuscle.name)'."
     }
     
     var previousSetSummary: String? {
@@ -86,8 +99,8 @@ final class HomeScreenViewModel {
         }
     }
     
-    var toastMessage: String?
-    var isToastError: Bool = false
+    var toast: ToastConfig? = nil
+    private var toastTask: Task<Void, Never>?
     
     init(
         bodyWeightService: BodyWeightServiceProtocol? = nil,
@@ -95,11 +108,9 @@ final class HomeScreenViewModel {
     ) {
         let bodyWeightService = bodyWeightService ?? BodyWeightService()
         self.bodyWeightService = bodyWeightService
-
         
         let exerciseService = exerciseService ?? ExerciseService()
         self.exerciseService = exerciseService
-
         
         loadInitialDataAndPreFill()
     }
@@ -143,17 +154,26 @@ final class HomeScreenViewModel {
     }
     
     func logBodyWeight() {
-        guard bodyWeight > 0 else { return }
+        guard isBodyWeightValid else { return }
+        
         do {
             try bodyWeightService.saveBodyWeight(bodyWeight)
-            showToast("Body weight saved!")
+            showToast(
+                message: "Body weight saved!",
+                icon: "checkmark.circle.fill",
+                tintColor: .green
+            )
         } catch {
-            showToast("Failed to save body weight.", isError: true)
+            showToast(
+                message: "Failed to save body weight.",
+                icon: "exclamationmark.triangle.fill",
+                tintColor: .red
+            )
         }
     }
     
     func logExerciseSet() {
-        guard weight > 0, repetition > 0, let exercise = selectedExercise else { return }
+        guard isExerciseSetValid, let exercise = selectedExercise else { return }
         
         do {
             try exerciseService.saveExerciseLog(
@@ -164,14 +184,23 @@ final class HomeScreenViewModel {
             
             self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
             
-            showToast("Logged \(exercise.name) (\(weight)kg x \(repetition) reps)")
+            showToast(
+                message: "Logged \(exercise.name) (\(weight)kg x \(repetition) reps)",
+                icon: "checkmark.circle.fill",
+                tintColor: .green
+            )
         } catch {
-            showToast("Failed to log set.", isError: true)
+            showToast(
+                message: "Failed to log set.",
+                icon: "exclamationmark.triangle.fill",
+                tintColor: .red
+            )
         }
     }
     
-    func addCategory(name: String) {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    func commitNewCategory() {
+        let trimmedName = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+        defer { newCategoryName = "" }
         guard !trimmedName.isEmpty else { return }
         
         let newCategory = MuscleCategory(name: trimmedName)
@@ -180,12 +209,21 @@ final class HomeScreenViewModel {
             self.categories = (try? exerciseService.fetchCategories()) ?? []
             self.selectedMuscle = categories.first(where: { $0.id == newCategory.id })
         } catch {
-            print("Failed to save category: \(error)")
+            showToast(
+                message: "Failed to save target muscle.",
+                icon: "exclamationmark.triangle.fill",
+                tintColor: .red
+            )
         }
     }
     
-    func addExercise(name: String) {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    func cancelCategoryInput() {
+        newCategoryName = ""
+    }
+    
+    func commitNewExercise() {
+        let trimmedName = newExerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+        defer { newExerciseName = "" }
         guard !trimmedName.isEmpty, let targetCategory = selectedMuscle else { return }
         
         let newExercise = Exercise(categoryId: targetCategory.id, name: trimmedName)
@@ -194,21 +232,69 @@ final class HomeScreenViewModel {
             self.exercises = (try? exerciseService.fetchExercises()) ?? []
             self.selectedExercise = exercises.first(where: { $0.id == newExercise.id })
         } catch {
-            print("Failed to save exercise: \(error)")
+            showToast(
+                message: "Failed to save exercise.",
+                icon: "exclamationmark.triangle.fill",
+                tintColor: .red
+            )
         }
     }
     
-    func showToast(_ message: String, isError: Bool = false) {
-        withAnimation(.snappy) {
-            self.toastMessage = message
-            self.isToastError = isError
-        }
+    func cancelExerciseInput() {
+        newExerciseName = ""
+    }
+    
+    func showToast(
+        message: String,
+        icon: String? = "info.circle.fill",
+        tintColor: Color = .blue
+    ) {
+        toastTask?.cancel()
         
-        Task {
-            try? await Task.sleep(for: .seconds(2.5))
-            withAnimation(.snappy) {
-                self.toastMessage = nil
+        let config = ToastConfig(message: message, icon: icon, tintColor: tintColor)
+        self.toast = config
+        
+        toastTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            
+            if self.toast == config {
+                self.toast = nil
             }
         }
+    }
+}
+
+extension HomeScreenViewModel {
+    enum ValidationLimits {
+        static let bodyWeight: ClosedRange<Double> = 20.0...300.0
+        static let exerciseWeight: ClosedRange<Double> = 0.0...500.0
+        static let repetition: ClosedRange<Int> = 1...200
+    }
+    
+    var isBodyWeightValid: Bool {
+        ValidationLimits.bodyWeight.contains(bodyWeight)
+    }
+    
+    var isExerciseSetValid: Bool {
+        guard selectedExercise != nil else { return false }
+        
+        let isValidWeight = ValidationLimits.exerciseWeight.contains(weight)
+        let isValidReps = ValidationLimits.repetition.contains(repetition)
+        
+        return isValidWeight && isValidReps
+    }
+    
+    var validationErrorMessage: String? {
+        if bodyWeight > 0 && !ValidationLimits.bodyWeight.contains(bodyWeight) {
+            return "Body weight must be between 20 kg and 250 kg."
+        }
+        if weight > ValidationLimits.exerciseWeight.upperBound {
+            return "Weight cannot exceed 500 kg."
+        }
+        if repetition > ValidationLimits.repetition.upperBound {
+            return "Reps cannot exceed 100."
+        }
+        return nil
     }
 }

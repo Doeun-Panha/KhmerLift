@@ -15,18 +15,11 @@ enum FormField: Hashable {
 
 struct HomeScreenView: View {
     @State private var viewModel = HomeScreenViewModel()
-    @State private var displayInfo: DisplayLayoutInfo?
-    
-    @State private var isAddingCategory: Bool = false
-    @State private var newCategoryName: String = ""
-    
-    @State private var isAddingExercise: Bool = false
-    @State private var newExerciseName: String = ""
-    
     @FocusState private var focusedField: FormField?
 
-    
     var body: some View {
+        @Bindable var viewModel = viewModel
+        
         VStack(alignment: .center, spacing: 16) {
             headerView
             
@@ -45,56 +38,42 @@ struct HomeScreenView: View {
         .padding(.leading, 10)
         .onSubmit(advanceFocus)
         
-        .alert("Add New Target Muscle", isPresented: $isAddingCategory) {
-            TextField("e.g. Shoulders, Arms", text: $newCategoryName)
+        .alert("Add New Target Muscle", isPresented: $viewModel.isAddingCategory) {
+            TextField("e.g. Shoulders, Arms", text: $viewModel.newCategoryName)
             Button("Add") {
-                viewModel.addCategory(name: newCategoryName)
-                newCategoryName = ""
+                viewModel.commitNewCategory()
             }
             Button("Cancel", role: .cancel) {
-                newCategoryName = ""
+                viewModel.cancelCategoryInput()
             }
         } message: {
             Text("Enter a name for the new muscle group.")
         }
         
-        .alert("Add New Exercise", isPresented: $isAddingExercise) {
-            TextField("e.g. Lateral Raise, Bicep Curl", text: $newExerciseName)
+        .alert("Add New Exercise", isPresented: $viewModel.isAddingExercise) {
+            TextField("e.g. Lateral Raise, Bicep Curl", text: $viewModel.newExerciseName)
             Button("Add") {
-                viewModel.addExercise(name: newExerciseName)
-                newExerciseName = ""
+                viewModel.commitNewExercise()
             }
             Button("Cancel", role: .cancel) {
-                newExerciseName = ""
+                viewModel.cancelExerciseInput()
             }
         } message: {
-            if let targetCategory = viewModel.selectedMuscle {
-                Text("Adding new exercise under '\(targetCategory.name)'.")
-            }
+            Text(viewModel.addExerciseAlertMessage)
         }
         
-        .overlay(alignment: .top) {
-            if let toastMessage = viewModel.toastMessage {
-                ToastBannerView(
-                    message: toastMessage,
-                    isError: viewModel.isToastError
-                )
-                .padding(.top, 10)
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
-        }
-        .animation(.snappy, value: viewModel.toastMessage)
+        .toast(viewModel.toast)
     }
     
     private var headerView: some View {
         HStack(spacing: 5) {
-            Text("KhmerLift")
+            Text(viewModel.title)
                 .font(.nunito(26, weight: .heavy))
                 .foregroundStyle(.white)
             
             Spacer()
             
-            Text("0")
+            Text("\(viewModel.streakCount)")
                 .font(.nunito(20, weight: .medium))
                 .foregroundStyle(.gray)
             
@@ -123,18 +102,25 @@ struct HomeScreenView: View {
             
             GlassTextFieldView(
                 title: "Body Weight",
-                placeholder: "kg",
+                placeholder: "20kg+",
                 text: $viewModel.bodyWeightString,
-                keyboardType: .decimalPad
+                keyboardType: .decimalPad,
+                maxLength: 5,
+                allowedRange: 20.0...300.0,
+                onExceedLimit: {
+                    viewModel.showToast(message: "Maximum 5 characters allowed.", tintColor: .orange)
+                },
+                onOutOfRange: {
+                    viewModel.showToast(message: "Body weight must be between 20kg and 300kg.", tintColor: .red)
+                    triggerHaptic()
+                }
             )
             .focused($focusedField, equals: .bodyWeight)
             .id(FormField.bodyWeight)
-            .submitLabel(.done)
             
             Button(action: {
                 focusedField = nil
                 viewModel.logBodyWeight()
-                dismissKeyboard()
                 triggerHaptic()
             }) {
                 Text("Log Body Weight")
@@ -142,6 +128,7 @@ struct HomeScreenView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12.5)
+                    .contentShape(Rectangle())
                     .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
             }
             .buttonStyle(.plain)
@@ -167,18 +154,18 @@ struct HomeScreenView: View {
                 selection: $viewModel.selectedMuscle,
                 items: viewModel.categories,
                 onAddNew: {
-                    isAddingCategory = true
+                    viewModel.isAddingCategory = true
                 }
             )
             
             GlassDropdownView(
                 title: "Exercise",
-                placeholder: viewModel.selectedMuscle == nil ? "Select Muscle First" : "Select Exercise",
+                placeholder: viewModel.exercisePlaceholderText,
                 selection: $viewModel.selectedExercise,
                 items: viewModel.filteredExercises,
-                isDisabled: viewModel.selectedMuscle == nil,
+                isDisabled: viewModel.isExerciseDropdownDisabled,
                 onAddNew: {
-                    isAddingExercise = true
+                    viewModel.isAddingExercise = true
                 }
             )
             
@@ -193,26 +180,41 @@ struct HomeScreenView: View {
                 title: "Weight",
                 placeholder: "kg",
                 text: $viewModel.weightString,
-                keyboardType: .decimalPad
+                keyboardType: .decimalPad,
+                maxLength: 5,
+                allowedRange: 0.0...500.0,
+                onExceedLimit: {
+                    viewModel.showToast(message: "Maximum 5 characters allowed.", tintColor: .orange)
+                },
+                onOutOfRange: {
+                    viewModel.showToast(message: "Weight cannot exceed 500kg.", tintColor: .red)
+                    triggerHaptic()
+                }
             )
             .focused($focusedField, equals: .weight)
             .id(FormField.weight)
-            .submitLabel(.next)
             
             GlassTextFieldView(
                 title: "Repetition",
                 placeholder: "0",
                 text: $viewModel.repetitionString,
-                keyboardType: .numberPad
+                keyboardType: .numberPad,
+                maxLength: 3,
+                allowedRange: 1.0...200.0,
+                onExceedLimit: {
+                    viewModel.showToast(message: "Maximum 3 digits allowed.", tintColor: .orange)
+                },
+                onOutOfRange: {
+                    viewModel.showToast(message: "Reps must be between 1 and 200.", tintColor: .red)
+                    triggerHaptic()
+                }
             )
             .focused($focusedField, equals: .repetition)
             .id(FormField.repetition)
-            .submitLabel(.done)
             
             Button(action: {
                 focusedField = nil
                 viewModel.logExerciseSet()
-                dismissKeyboard()
                 triggerHaptic()
             }) {
                 Text("Log Set")
@@ -240,17 +242,11 @@ struct HomeScreenView: View {
     
     private func scrollToFocusedField(_ field: FormField?, using proxy: ScrollViewProxy) {
         guard let field else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        Task {
+            try? await Task.sleep(nanoseconds: 250_000_000)
             withAnimation(.easeInOut(duration: 0.25)) {
                 proxy.scrollTo(field, anchor: .center)
             }
         }
-    }
-}
-
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        HomeScreenView()
     }
 }

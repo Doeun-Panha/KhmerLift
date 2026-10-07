@@ -8,62 +8,85 @@
 import SwiftUI
 
 struct MoreScreenView: View {
-    @State private var enableFaceID = false
-    @State private var navigateToFaceID = false
+    @State private var viewModel = MoreScreenViewModel()
     
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .center, spacing: 16) {
-                headerView
-                
-                formContentView
-                
-                Spacer()
+        ZStack {
+            NavigationStack {
+                VStack(alignment: .center, spacing: 16) {
+                    HStack(spacing: 5) {
+                        Text("Settings")
+                            .font(.nunito(26, weight: .heavy))
+                            .foregroundStyle(.white)
+                        
+                        Spacer()
+                    }
+                    .padding(.top, 30)
+                    
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            GlassSwitchButtonView(
+                                title: "Security",
+                                name: "Biometric Face ID",
+                                isOn: Binding(
+                                    get: { viewModel.enableFaceID },
+                                    set: { viewModel.handleFaceIDToggleChange($0) }
+                                )
+                            )
+                            
+                            GlassAccessoryButtonView(
+                                name: "My Face",
+                                assessory: "chevron.right"
+                            ) {
+                                
+                            }
+                            
+                            GlassSwitchButtonView(
+                                name: "Passcode",
+                                isOn: Binding(
+                                    get: { viewModel.enablePasscode },
+                                    set: { viewModel.handlePasscodeToggleChange($0) }
+                                )
+                            )
+                            
+                            GlassDropdownView(
+                                title: "Background",
+                                placeholder: "Select Background",
+                                selection: $viewModel.selectedBackground,
+                                items: viewModel.availableBackgrounds,
+                                onAddNew: {
+                                    viewModel.isAddinBackground = true
+                                }
+                            )
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.leading, 10)
             }
-            .padding(.horizontal)
-            .padding(.leading, 10)
-            .navigationDestination(isPresented: $navigateToFaceID) {
+            .fullScreenCover(
+                isPresented: $viewModel.navigateToFaceID,
+                onDismiss: {
+                    viewModel.handleFaceIDDismissal()
+                }
+            ) {
                 FaceIDScreenView(
-                    timer: .constant(10),
-                    status: .constant("Looking for face...")
+                    onSuccess: {
+                        viewModel.confirmFaceIDSetupSuccess()
+                    },
+                    onFailure: {
+                        viewModel.handleFaceIDDismissal()
+                    }
                 )
             }
-            .onChange(of: enableFaceID) { _, newValue in
-                guard newValue else { return }
-                
-                Task {
-                    try? await Task.sleep(for: .milliseconds(250))
-                    navigateToFaceID = true
-                }
+            .alert("Face ID Not Set Up", isPresented: $viewModel.showSettingsAlert) {
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Face ID is not set up on this device. Go to 'Settings' > 'Face ID & Passcode' > 'Set Up Face ID' to set it up.")
             }
-            .onChange(of: navigateToFaceID) { _, isPresented in
-                if !isPresented {
-                    enableFaceID = false
-                }
-            }
-        }
-    }
-    
-    private var headerView: some View {
-        HStack(spacing: 5) {
-            Text("Settings")
-                .font(.nunito(26, weight: .heavy))
-                .foregroundStyle(.white)
-            
-            Spacer()
-        }
-        .padding(.top, 30)
-    }
-    
-    private var formContentView: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                GlassSwitchButtonView(
-                    title: "Security",
-                    name: "Biometric Face ID",
-                    isOn: $enableFaceID
-                )
-            }
+            .toast(viewModel.toast)
         }
     }
 }
