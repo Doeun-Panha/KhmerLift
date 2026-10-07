@@ -16,9 +16,13 @@ public enum FaceIDStatus {
 public protocol BiometricServiceProtocol {
     func checkFaceIDStatus() -> FaceIDStatus
     func authenticate(reason: String) async throws -> Bool
+    func cancelAuthentication()
 }
 
+@MainActor
 public final class BiometricService: BiometricServiceProtocol {
+    private var currentContext: LAContext?
+    
     public init() {}
     
     public func checkFaceIDStatus() -> FaceIDStatus {
@@ -37,6 +41,15 @@ public final class BiometricService: BiometricServiceProtocol {
     
     public func authenticate(reason: String) async throws -> Bool {
         let context = LAContext()
-        return try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
+        self.currentContext = context
+        
+        defer { self.currentContext = nil }
+        
+        return try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
+    }
+    
+    public func cancelAuthentication() {
+        currentContext?.invalidate()
+        currentContext = nil
     }
 }

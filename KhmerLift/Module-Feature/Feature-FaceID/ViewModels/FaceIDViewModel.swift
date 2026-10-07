@@ -16,6 +16,8 @@ final class FaceIDViewModel: ObservableObject {
     private let biometricService: BiometricServiceProtocol
     let cameraManager = CameraManager()
     
+    private var authTask: Task<Void, Never>?
+    
     @Published var timer: Int
     @Published var status: String
     @Published var isMuted: Bool = false
@@ -60,12 +62,18 @@ final class FaceIDViewModel: ObservableObject {
     
     func onViewAppear() {
         cameraManager.checkPermissionAndStart()
-        Task {
+        
+        authTask?.cancel()
+        authTask = Task {
             await authenticateWithFaceID()
         }
     }
     
     func onViewDisappear() {
+        authTask?.cancel()
+        authTask = nil
+        
+        biometricService.cancelAuthentication()
         cameraManager.stopSession()
     }
     
@@ -75,6 +83,8 @@ final class FaceIDViewModel: ObservableObject {
     
     private func authenticateWithFaceID() async {
         try? await Task.sleep(for: .seconds(1))
+        
+        guard !Task.isCancelled else { return }
         
         guard biometricService.checkFaceIDStatus() == .available else {
             status = "Face ID unavailable"
@@ -87,23 +97,33 @@ final class FaceIDViewModel: ObservableObject {
                 reason: "Verify Face ID to enable security feature."
             )
             
+            guard !Task.isCancelled else { return }
+            
             if success {
                 isAuthenticated = true
                 status = "Verification Successful"
                 try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
                 onSuccess?()
                 shouldDismiss = true
             } else {
                 handleCancel()
             }
         } catch {
+            guard !Task.isCancelled else { return }
             status = "Authentication Canceled"
             handleCancel()
         }
     }
     
     private func handleCancel() {
+        guard !Task.isCancelled else { return }
         onFailure?()
         shouldDismiss = true
+    }
+    
+    func handleUserCancel() {
+        onViewDisappear()
+        onFailure?()
     }
 }

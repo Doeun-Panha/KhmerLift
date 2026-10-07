@@ -102,9 +102,18 @@ struct HomeScreenView: View {
             
             GlassTextFieldView(
                 title: "Body Weight",
-                placeholder: "kg",
+                placeholder: "20kg+",
                 text: $viewModel.bodyWeightString,
-                keyboardType: .decimalPad
+                keyboardType: .decimalPad,
+                maxLength: 5,
+                allowedRange: 20.0...300.0,
+                onExceedLimit: {
+                    viewModel.showToast(message: "Maximum 5 characters allowed.", tintColor: .orange)
+                },
+                onOutOfRange: {
+                    viewModel.showToast(message: "Body weight must be between 20kg and 300kg.", tintColor: .red)
+                    triggerHaptic()
+                }
             )
             .focused($focusedField, equals: .bodyWeight)
             .id(FormField.bodyWeight)
@@ -171,7 +180,16 @@ struct HomeScreenView: View {
                 title: "Weight",
                 placeholder: "kg",
                 text: $viewModel.weightString,
-                keyboardType: .decimalPad
+                keyboardType: .decimalPad,
+                maxLength: 5,
+                allowedRange: 0.0...500.0,
+                onExceedLimit: {
+                    viewModel.showToast(message: "Maximum 5 characters allowed.", tintColor: .orange)
+                },
+                onOutOfRange: {
+                    viewModel.showToast(message: "Weight cannot exceed 500kg.", tintColor: .red)
+                    triggerHaptic()
+                }
             )
             .focused($focusedField, equals: .weight)
             .id(FormField.weight)
@@ -180,7 +198,16 @@ struct HomeScreenView: View {
                 title: "Repetition",
                 placeholder: "0",
                 text: $viewModel.repetitionString,
-                keyboardType: .numberPad
+                keyboardType: .numberPad,
+                maxLength: 3,
+                allowedRange: 1.0...200.0,
+                onExceedLimit: {
+                    viewModel.showToast(message: "Maximum 3 digits allowed.", tintColor: .orange)
+                },
+                onOutOfRange: {
+                    viewModel.showToast(message: "Reps must be between 1 and 200.", tintColor: .red)
+                    triggerHaptic()
+                }
             )
             .focused($focusedField, equals: .repetition)
             .id(FormField.repetition)

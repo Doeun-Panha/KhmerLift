@@ -267,9 +267,9 @@ final class HomeScreenViewModel {
 
 extension HomeScreenViewModel {
     enum ValidationLimits {
-        static let bodyWeight: ClosedRange<Double> = 20.0...250.0
+        static let bodyWeight: ClosedRange<Double> = 20.0...300.0
         static let exerciseWeight: ClosedRange<Double> = 0.0...500.0
-        static let repetition: ClosedRange<Int> = 1...100
+        static let repetition: ClosedRange<Int> = 1...200
     }
     
     var isBodyWeightValid: Bool {

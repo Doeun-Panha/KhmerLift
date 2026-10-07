@@ -41,6 +41,14 @@ struct MoreScreenView: View {
                                 
                             }
                             
+                            GlassSwitchButtonView(
+                                name: "Passcode",
+                                isOn: Binding(
+                                    get: { viewModel.enablePasscode },
+                                    set: { viewModel.handlePasscodeToggleChange($0) }
+                                )
+                            )
+                            
                             GlassDropdownView(
                                 title: "Background",
                                 placeholder: "Select Background",
@@ -57,19 +65,21 @@ struct MoreScreenView: View {
                 }
                 .padding(.horizontal)
                 .padding(.leading, 10)
-                .navigationDestination(isPresented: $viewModel.navigateToFaceID) {
-                    FaceIDScreenView(
-                        onSuccess: {
-                            viewModel.confirmFaceIDSetupSuccess()
-                        },
-                        onFailure: {
-                            viewModel.handleFaceIDToggleChange(false)
-                        }
-                    )
-                    .onDisappear {
+            }
+            .fullScreenCover(
+                isPresented: $viewModel.navigateToFaceID,
+                onDismiss: {
+                    viewModel.handleFaceIDDismissal()
+                }
+            ) {
+                FaceIDScreenView(
+                    onSuccess: {
+                        viewModel.confirmFaceIDSetupSuccess()
+                    },
+                    onFailure: {
                         viewModel.handleFaceIDDismissal()
                     }
-                }
+                )
             }
             .alert("Face ID Not Set Up", isPresented: $viewModel.showSettingsAlert) {
                 Button("Cancel", role: .cancel) { }
