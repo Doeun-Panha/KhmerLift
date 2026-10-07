@@ -8,15 +8,14 @@
 import SwiftUI
 
 struct LockScreenView: View {
-    var viewModel: KhmerLiftAppScreenViewModel
+    @Bindable var viewModel: KhmerLiftAppScreenViewModel
     
     var body: some View {
         VStack(spacing: 24) {
-            Spacer()
-            
             Image(systemName: "lock")
                 .font(.system(size: 70))
                 .foregroundStyle(.white)
+                .padding(.top, 50)
             
             VStack(spacing: 8) {
                 Text("KhmerLift Locked")
@@ -27,31 +26,70 @@ struct LockScreenView: View {
                     Text(errorMessage)
                         .font(.subheadline)
                         .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
                 }
             }
             
             Spacer()
             
-            Button {
-                Task {
-                    await viewModel.authenticate()
+            VStack(spacing: 16) {
+                if viewModel.isFaceIDEnabled {
+                    Button {
+                        Task {
+                            await viewModel.authenticateWithFaceID()
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "faceid")
+                                .font(.title3)
+                            Text("Unlock with Face ID")
+                        }
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(Color.blue)
+                        .clipShape(Capsule())
+                    }
                 }
-            } label: {
-                HStack {
-                    Image(systemName: "faceid")
-                    Text("Unlock with Face ID")
+                
+                if viewModel.isPasscodeEnabled {
+                    Button {
+                        viewModel.showPasscodeSheet = true
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "number.square")
+                                .font(.title3)
+                            Text("Unlock with Passcode")
+                        }
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(
+                            viewModel.isFaceIDEnabled
+                                ? Color.white.opacity(0.15)
+                                : Color.blue
+                        )
+                        .clipShape(Capsule())
+                    }
                 }
-                .font(.headline)
-                .foregroundStyle(.white)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.blue)
-                .clipShape(Capsule())
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea())
+        .fullScreenCover(isPresented: $viewModel.showPasscodeSheet) {
+            PasscodeSetupView(
+                onSuccess: {
+                    viewModel.unlockApp()
+                },
+                onFailure: {
+                    viewModel.showPasscodeSheet = false
+                }
+            )
+        }
     }
 }

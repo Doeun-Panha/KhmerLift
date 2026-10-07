@@ -68,6 +68,18 @@ final class MoreScreenViewModel {
             return
         }
         
+        guard enablePasscode else {
+            self.enableFaceID = false
+            saveFaceIDPreference(false)
+            
+            showToast(
+                message: "Please set up a passcode first before enabling Face ID.",
+                icon: "lock.trianglebadge.exclamationmark.fill",
+                tintColor: .orange
+            )
+            return
+        }
+        
         let status = biometricService.checkFaceIDStatus()
         
         switch status {
@@ -123,6 +135,17 @@ final class MoreScreenViewModel {
                 self.navigateToPasscodeSetup = true
             }
         } else {
+            guard !enableFaceID else {
+                self.enablePasscode = true
+                
+                showToast(
+                    message: "Please turn off Face ID first before disabling Passcode.",
+                    icon: "lock.trianglebadge.exclamationmark.fill",
+                    tintColor: .orange
+                )
+                return
+            }
+            
             removePasscodeFromKeychain()
             savePasscodePreference(false)
             self.enablePasscode = false
