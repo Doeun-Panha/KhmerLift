@@ -47,7 +47,7 @@ struct MoreScreenView: View {
                                 selection: $viewModel.selectedBackground,
                                 items: viewModel.availableBackgrounds,
                                 onAddNew: {
-                                    
+                                    viewModel.isAddinBackground = true
                                 }
                             )
                         }

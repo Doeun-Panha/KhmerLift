@@ -13,6 +13,9 @@ final class MoreScreenViewModel {
     var showSettingsAlert: Bool = false
     var toast: ToastConfig? = nil
     
+    var isAddinBackground: Bool = false
+    var newBackgroundName: String = ""
+    
     let availableBackgrounds: [BackgroundModel] = [
         BackgroundModel(id: "bike-video", name: "Bike", fileName: "bike-video", fileType: "mp4"),
         BackgroundModel(id: "bike-nature-video", name: "Bike Nature", fileName: "bike-nature-video", fileType: "mp4"),
