@@ -46,6 +46,7 @@ final class PasscodeViewModel {
     }
     
     var toast: ToastConfig? = nil
+    private var toastTask: Task<Void, Never>?
     
     init(
         mode: Mode
@@ -89,22 +90,14 @@ final class PasscodeViewModel {
                 if savePasscodeToKeychain(enteredPin) {
                     isSuccess = true
                 } else {
-                    showToast(
-                        message: "Failed to save passcode securely.",
-                        icon: "exclamationmark.triangle.fill",
-                        tintColor: .red
-                    )
+                    showToast(.error("Failed to save passcode securely."))
                     errorTrigger += 1
                     enteredPin = ""
                     firstPinAttempt = ""
                     setupStep = .create
                 }
             } else {
-                showToast(
-                    message: "Entered Passcodes do not match.",
-                    icon: "xmark.octagon.fill",
-                    tintColor: .red
-                )
+                showToast(.error("Entered Passcodes do not match.", icon: "xmark.octagon.fill"))
                 errorTrigger += 1
                 enteredPin = ""
                 firstPinAttempt = ""
@@ -119,11 +112,7 @@ final class PasscodeViewModel {
         if enteredPin == savedPasscode {
             isSuccess = true
         } else {
-            showToast(
-                message: "Incorrect Passcode",
-                icon: "xmark.octagon.fill",
-                tintColor: .red
-            )
+            showToast(.error("Incorrect Passcode", icon: "xmark.octagon.fill"))
             errorTrigger += 1
             enteredPin = ""
         }
@@ -138,20 +127,15 @@ final class PasscodeViewModel {
         return success
     }
     
-    func showToast(
-        message: String,
-        icon: String? = "info.circle.fill",
-        tintColor: Color = .blue
-    ) {
-        let config = ToastConfig(
-            message: message,
-            icon: icon,
-            tintColor: tintColor
-        )
+    func showToast(_ config: ToastConfig) {
+        toastTask?.cancel()
+        
         self.toast = config
         
-        Task {
+        toastTask = Task {
             try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            
             if self.toast == config {
                 self.toast = nil
             }

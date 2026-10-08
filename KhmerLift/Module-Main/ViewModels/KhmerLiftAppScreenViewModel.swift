@@ -29,6 +29,7 @@ final class KhmerLiftAppScreenViewModel {
     }
     private(set) var isAuthenticating: Bool = false
     private var hasAutoAttemptedFaceID: Bool = false
+    private var hasEnteredBackground: Bool = false
     
     private let biometricService: BiometricServiceProtocol
     private let faceIDKey = "isFaceIDEnabled"
@@ -108,12 +109,26 @@ final class KhmerLiftAppScreenViewModel {
             lockState = .locked
             showPasscodeSheet = false
             hasAutoAttemptedFaceID = false
+            hasEnteredBackground = true
             biometricService.cancelAuthentication()
         } else if newPhase == .active && lockState == .locked {
+            guard hasEnteredBackground else { return }
+            hasEnteredBackground = false
+            
             if isFaceIDEnabled && !hasAutoAttemptedFaceID && !showPasscodeSheet {
                 hasAutoAttemptedFaceID = true
                 Task { await authenticateWithFaceID() }
+            } else if isPasscodeEnabled {
+                showPasscodeSheet = true
             }
         }
+    }
+    
+    func lockApp() {
+        guard isLockEnabled else { return }
+        
+        lockState = .locked
+        showPasscodeSheet = false
+        biometricService.cancelAuthentication()
     }
 }

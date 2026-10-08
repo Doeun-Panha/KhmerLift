@@ -43,4 +43,5 @@ struct MainScreenView: View {
 
 #Preview {
     MainScreenView()
+        .environment(KhmerLiftAppScreenViewModel())
 }

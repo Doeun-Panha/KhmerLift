@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MoreScreenView: View {
+    @Environment(KhmerLiftAppScreenViewModel.self) private var appViewModel
     @State private var viewModel = MoreScreenViewModel()
     
     var body: some View {
@@ -19,6 +20,22 @@ struct MoreScreenView: View {
                         .foregroundStyle(.white)
                     
                     Spacer()
+                    
+                    Button(action: {
+                        appViewModel.lockApp()
+                        triggerWarningHaptic()
+                    }) {
+                        Image(systemName: "lock")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .clipShape(Circle())
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(BouncyButtonStyle())
+                    .glassEffect(.clear)
+                    .disabled(!appViewModel.isLockEnabled)
+                    .opacity(appViewModel.isLockEnabled ? 1.0 : 0.5)
                 }
                 .padding(.top, 30)
                 

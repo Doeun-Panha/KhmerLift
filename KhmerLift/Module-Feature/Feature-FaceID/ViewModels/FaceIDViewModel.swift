@@ -26,7 +26,7 @@ final class FaceIDViewModel: ObservableObject {
     
     init(
         biometricService: BiometricServiceProtocol? = nil,
-        initialTimer: Int = 19,
+        initialTimer: Int = 30,
         initialStatus: String = "No face detected",
         onSuccess: (() -> Void)? = nil,
         onFailure: (() -> Void)? = nil

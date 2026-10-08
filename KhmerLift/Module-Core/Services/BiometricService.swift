@@ -45,7 +45,7 @@ public final class BiometricService: BiometricServiceProtocol {
         
         defer { self.currentContext = nil }
         
-        return try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
+        return try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
     }
     
     public func cancelAuthentication() {

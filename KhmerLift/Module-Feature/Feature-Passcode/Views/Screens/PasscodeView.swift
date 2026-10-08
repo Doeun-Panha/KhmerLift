@@ -97,15 +97,23 @@ struct PasscodeView: View {
                 .padding()
             }
             .padding(.horizontal, 20)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+//            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+//            .overlay(
+//                RoundedRectangle(cornerRadius: 32, style: .continuous)
+//                    .stroke(Color.white.opacity(0.35), lineWidth: 1)
+//            )
+//            .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
         }
         .toolbar(.hidden, for: .navigationBar)
         
         .onChange(of: viewModel.isSuccess) { _, success in
             if success {
+                triggerSuccessHaptic()
+                
                 withAnimation(.easeInOut(duration: 0.15)) {
                     isSuccess = true
                 }
@@ -117,7 +125,7 @@ struct PasscodeView: View {
             }
         }
         .onChange(of: viewModel.errorTrigger) { _, _ in
-            triggerErrorHaptic()
+//            triggerErrorHaptic()
             
             withAnimation(.easeInOut(duration: 0.1)) {
                 isError = true

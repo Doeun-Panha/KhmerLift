@@ -108,31 +108,35 @@ struct HomeScreenView: View {
                 maxLength: 5,
                 allowedRange: 20.0...300.0,
                 onExceedLimit: {
-                    viewModel.showToast(message: "Maximum 5 characters allowed.", tintColor: .orange)
+                    viewModel.showToast(.warning("Maximum 5 characters allowed."))
                 },
                 onOutOfRange: {
-                    viewModel.showToast(message: "Body weight must be between 20kg and 300kg.", tintColor: .red)
-                    triggerErrorHaptic()
+                    viewModel.showToast(.error("Body weight must be between 20kg and 300kg."))
+//                    triggerErrorHaptic()
                 }
             )
             .focused($focusedField, equals: .bodyWeight)
             .id(FormField.bodyWeight)
             
-            Button(action: {
+            Button {
                 focusedField = nil
                 viewModel.logBodyWeight()
-                triggerSuccessHaptic()
-            }) {
-                Text("Log Body Weight")
-                    .font(.nunito(15, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12.5)
-                    .contentShape(Rectangle())
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+//                triggerSuccessHaptic()
+            } label: {
+                HStack {
+                    Text("Log Body Weight")
+                        .font(.nunito(15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12.5)
+                        .contentShape(Rectangle())
+                }
+                .background(Color.blue.opacity(0.15))
+                .clipShape(Capsule())
             }
             .buttonStyle(.plain)
             .disabled(!viewModel.isBodyWeightValid)
+            .glassEffect(.clear, in: Capsule())
             
             Rectangle()
                 .fill(Color.white.opacity(0.15))
@@ -186,11 +190,10 @@ struct HomeScreenView: View {
                 maxLength: 5,
                 allowedRange: 0.0...500.0,
                 onExceedLimit: {
-                    viewModel.showToast(message: "Maximum 5 characters allowed.", tintColor: .orange)
+                    viewModel.showToast(.warning("Maximum 3 characters allowed."))
                 },
                 onOutOfRange: {
-                    viewModel.showToast(message: "Weight cannot exceed 500kg.", tintColor: .red)
-                    triggerErrorHaptic()
+                    viewModel.showToast(.error("Weight cannot exceed 500kg."))
                 }
             )
             .focused($focusedField, equals: .weight)
@@ -204,30 +207,34 @@ struct HomeScreenView: View {
                 maxLength: 3,
                 allowedRange: 1.0...200.0,
                 onExceedLimit: {
-                    viewModel.showToast(message: "Maximum 3 digits allowed.", tintColor: .orange)
+                    viewModel.showToast(.warning("Maximum 3 digits allowed."))
                 },
                 onOutOfRange: {
-                    viewModel.showToast(message: "Reps must be between 1 and 200.", tintColor: .red)
-                    triggerErrorHaptic()
+                    viewModel.showToast(.error("Reps must be between 1 and 200."))
                 }
             )
             .focused($focusedField, equals: .repetition)
             .id(FormField.repetition)
             
-            Button(action: {
+            Button {
                 focusedField = nil
                 viewModel.logExerciseSet()
-                triggerSuccessHaptic()
-            }) {
-                Text("Log Set")
-                    .font(.nunito(15, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12.5)
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+//                triggerSuccessHaptic()
+            } label: {
+                HStack {
+                    Text("Log Set")
+                        .font(.nunito(15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12.5)
+                        .contentShape(Rectangle())
+                }
+                .background(Color.blue.opacity(0.15))
+                .clipShape(Capsule())
             }
             .buttonStyle(.plain)
             .disabled(!viewModel.isExerciseSetValid)
+            .glassEffect(.clear, in: Capsule())
         }
     }
     

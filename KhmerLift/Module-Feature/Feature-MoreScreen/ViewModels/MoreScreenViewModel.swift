@@ -1,3 +1,10 @@
+//
+//  MoreScreenViewModel.swift
+//  KhmerLift
+//
+//  Created by Panha on 21/9/26.
+//
+
 import SwiftUI
 import Observation
 
@@ -9,6 +16,7 @@ final class MoreScreenViewModel {
     private let selectedBackgroundKey = "selectedBackgroundFileName"
     
     var toast: ToastConfig? = nil
+    private var toastTask: Task<Void, Never>?
     
     private let faceIDKey = "isFaceIDEnabled"
     private let passcodeKey = "isPasscodeEnabled"
@@ -54,12 +62,15 @@ final class MoreScreenViewModel {
         self.selectedBackground = availableBackgrounds.first(where: { $0.fileName == savedFileName }) ?? availableBackgrounds.first
     }
     
-    func showToast(message: String, icon: String? = "info.circle.fill", tintColor: Color = .blue) {
-        let config = ToastConfig(message: message, icon: icon, tintColor: tintColor)
+    func showToast(_ config: ToastConfig) {
+        toastTask?.cancel()
+        
         self.toast = config
         
-        Task {
+        toastTask = Task {
             try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            
             if self.toast == config {
                 self.toast = nil
             }
@@ -88,11 +99,7 @@ final class MoreScreenViewModel {
             self.enableFaceID = false
             saveFaceIDPreference(false)
             
-            showToast(
-                message: "Please set up a passcode first before enabling Face ID.",
-                icon: "lock.trianglebadge.exclamationmark.fill",
-                tintColor: .orange
-            )
+            showToast(.warning("Please set up a passcode first before enabling Face ID.", icon: "lock.trianglebadge.exclamationmark.fill"))
             return
         }
         
@@ -113,11 +120,7 @@ final class MoreScreenViewModel {
         case .notAvailable:
             self.enableFaceID = false
             saveFaceIDPreference(false)
-            showToast(
-                message: "Face ID is not available on this device.",
-                icon: "xmark.octagon.fill",
-                tintColor: .red
-            )
+            showToast(.error("Face ID is not available on this device.", icon: "xmark.octagon.fill"))
         }
     }
     
@@ -126,11 +129,7 @@ final class MoreScreenViewModel {
         self.enableFaceID = true
         self.navigateToFaceIDSetup = false
         
-        showToast(
-            message: "Face ID enabled successfully!",
-            icon: "checkmark.circle.fill",
-            tintColor: .green
-        )
+        showToast(.success("Face ID enabled successfully!"))
     }
 
     func confirmFaceIDDisableSuccess() {
@@ -138,11 +137,7 @@ final class MoreScreenViewModel {
         self.enableFaceID = false
         self.navigateToFaceIDDisable = false
         
-        showToast(
-            message: "Face ID disabled.",
-            icon: "lock.slash.fill",
-            tintColor: .gray
-        )
+        showToast(.info("Face ID disabled.", icon: "lock.slash.fill"))
     }
     
     func handleFaceIDDisableDismissal() {
@@ -166,11 +161,7 @@ final class MoreScreenViewModel {
             guard !enableFaceID else {
                 self.enablePasscode = true
                 
-                showToast(
-                    message: "Please turn off Face ID first before disabling Passcode.",
-                    icon: "lock.trianglebadge.exclamationmark.fill",
-                    tintColor: .orange
-                )
+                showToast(.warning("Please turn off Face ID first before disabling Passcode.", icon: "lock.trianglebadge.exclamationmark.fill"))
                 return
             }
                         
@@ -192,11 +183,7 @@ final class MoreScreenViewModel {
         self.enablePasscode = true
         self.navigateToPasscodeSetup = false
 
-        showToast(
-            message: "Passcode enabled successfully!",
-            icon: "checkmark.circle.fill",
-            tintColor: .green
-        )
+        showToast(.success("Passcode enabled successfully!"))
     }
     
     func confirmPasscodeDisableSuccess() {
@@ -205,11 +192,7 @@ final class MoreScreenViewModel {
         self.enablePasscode = false
         self.navigateToPasscodeDisable = false
         
-        showToast(
-            message: "Passcode disabled.",
-            icon: "lock.slash.fill",
-            tintColor: .gray
-        )
+        showToast(.info("Passcode disabled.", icon: "lock.slash.fill"))
     }
     
     func handlePasscodeDisableDismissal() {

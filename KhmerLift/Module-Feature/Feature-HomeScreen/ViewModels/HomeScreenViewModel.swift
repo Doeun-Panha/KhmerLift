@@ -158,17 +158,9 @@ final class HomeScreenViewModel {
         
         do {
             try bodyWeightService.saveBodyWeight(bodyWeight)
-            showToast(
-                message: "Body weight saved!",
-                icon: "checkmark.circle.fill",
-                tintColor: .green
-            )
+            showToast(.success("Body weight saved!"))
         } catch {
-            showToast(
-                message: "Failed to save body weight.",
-                icon: "exclamationmark.triangle.fill",
-                tintColor: .red
-            )
+            showToast(.error("Failed to save body weight."))
         }
     }
     
@@ -183,11 +175,7 @@ final class HomeScreenViewModel {
             self.categories = (try? exerciseService.fetchCategories()) ?? []
             self.selectedMuscle = categories.first(where: { $0.id == newCategory.id })
         } catch {
-            showToast(
-                message: "Failed to save target muscle.",
-                icon: "exclamationmark.triangle.fill",
-                tintColor: .red
-            )
+            showToast(.error("Failed to save target muscle."))
         }
     }
     
@@ -206,11 +194,7 @@ final class HomeScreenViewModel {
             self.exercises = (try? exerciseService.fetchExercises()) ?? []
             self.selectedExercise = exercises.first(where: { $0.id == newExercise.id })
         } catch {
-            showToast(
-                message: "Failed to save exercise.",
-                icon: "exclamationmark.triangle.fill",
-                tintColor: .red
-            )
+            showToast(.error("Failed to save exercise."))
         }
     }
     
@@ -230,28 +214,19 @@ final class HomeScreenViewModel {
             
             self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
             
-            showToast(
-                message: "Logged \(exercise.name) (\(weight)kg x \(repetition) reps)",
-                icon: "checkmark.circle.fill",
-                tintColor: .green
-            )
+            let formattedWeight = weight.truncatingRemainder(dividingBy: 1) == 0
+                ? String(format: "%.0f", weight)
+                : String(format: "%.1f", weight)
+            
+            showToast(.success("Logged \(exercise.name) (\(formattedWeight) kg × \(repetition) reps)"))
         } catch {
-            showToast(
-                message: "Failed to log set.",
-                icon: "exclamationmark.triangle.fill",
-                tintColor: .red
-            )
+            showToast(.error("Failed to log set."))
         }
     }
     
-    func showToast(
-        message: String,
-        icon: String? = "info.circle.fill",
-        tintColor: Color = .blue
-    ) {
+    func showToast(_ config: ToastConfig) {
         toastTask?.cancel()
         
-        let config = ToastConfig(message: message, icon: icon, tintColor: tintColor)
         self.toast = config
         
         toastTask = Task {

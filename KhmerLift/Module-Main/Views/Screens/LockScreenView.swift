@@ -12,24 +12,32 @@ struct LockScreenView: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            Image(systemName: "lock")
-                .font(.system(size: 70))
-                .foregroundStyle(.white)
-                .padding(.top, 50)
-            
-            VStack(spacing: 8) {
-                Text("KhmerLift Locked")
-                    .font(.nunito(22, weight: .bold))
+            VStack(spacing: 20) {
+                Image(systemName: "lock")
+                    .font(.system(size: 70))
                     .foregroundStyle(.white)
+                    .padding(.top, 50)
                 
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(.subheadline)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
+                VStack(spacing: 8) {
+                    Text("KhmerLift Locked")
+                        .font(.nunito(22, weight: .bold))
+                        .foregroundStyle(.white)
+                    
+                    if let errorMessage = viewModel.errorMessage {
+                        Text(errorMessage)
+                            .font(.subheadline)
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                    }
                 }
             }
+            .padding()
+            .padding(.bottom, 50)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
             
             Spacer()
             
@@ -46,12 +54,13 @@ struct LockScreenView: View {
                             Text("Unlock with Face ID")
                         }
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(Color.blue)
+                        .background(Color.cyan)
                         .clipShape(Capsule())
                     }
+                    .glassEffect(.clear, in: Capsule())
                 }
                 
                 if viewModel.isPasscodeEnabled {
@@ -61,19 +70,21 @@ struct LockScreenView: View {
                         HStack(spacing: 10) {
                             Image(systemName: "number.square")
                                 .font(.title3)
+                            
                             Text("Unlock with Passcode")
                         }
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
                         .background(
                             viewModel.isFaceIDEnabled
-                                ? Color.white.opacity(0.15)
-                                : Color.blue
+                                ? .clear
+                                : Color.blue.opacity(0.15)
                         )
                         .clipShape(Capsule())
                     }
+                    .glassEffect(.clear, in: Capsule())
                 }
             }
             .padding(.horizontal, 32)
