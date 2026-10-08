@@ -13,11 +13,13 @@ final class MoreScreenViewModel {
     
     var enableFaceID: Bool = false
     var navigateToFaceID: Bool = false
+    var navigateToPasscodeUnlock: Bool = false
     var showSettingsAlert: Bool = false
     var toast: ToastConfig? = nil
     
     var enablePasscode: Bool = false
     var navigateToPasscodeSetup = false
+    var navigateToPasscodeDisable: Bool = false
     
     var isAddinBackground: Bool = false
     var newBackgroundName: String = ""
@@ -56,15 +58,16 @@ final class MoreScreenViewModel {
         
         if !isEnabled {
             let wasPreviouslyEnabled = UserDefaults.standard.bool(forKey: faceIDKey)
-            saveFaceIDPreference(false)
             
             if wasPreviouslyEnabled {
-                showToast(
-                    message: "Face ID disabled.",
-                    icon: "lock.slash.fill",
-                    tintColor: .gray
-                )
+                Task {
+                    try? await Task.sleep(for: .milliseconds(250))
+                    self.navigateToPasscodeUnlock = true
+                }
+            } else {
+                saveFaceIDPreference(false)
             }
+            
             return
         }
         
@@ -105,6 +108,23 @@ final class MoreScreenViewModel {
         }
     }
     
+    func confirmFaceIDDisableSuccess() {
+        saveFaceIDPreference(false)
+        self.enableFaceID = false
+        self.navigateToPasscodeUnlock = false
+        
+        showToast(
+            message: "Face ID disabled.",
+            icon: "lock.slash.fill",
+            tintColor: .gray
+        )
+    }
+    
+    func handleFaceIDDisableDismissal() {
+        self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
+        self.navigateToPasscodeUnlock = false
+    }
+    
     func handleFaceIDDismissal() {
         self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
         self.navigateToFaceID = false
@@ -129,12 +149,7 @@ final class MoreScreenViewModel {
     func handlePasscodeToggleChange(_ isEnabled: Bool) {
         self.enablePasscode = isEnabled
         
-        if isEnabled {
-            Task {
-                try? await Task.sleep(for: .milliseconds(250))
-                self.navigateToPasscodeSetup = true
-            }
-        } else {
+        if !isEnabled {
             guard !enableFaceID else {
                 self.enablePasscode = true
                 
@@ -145,17 +160,36 @@ final class MoreScreenViewModel {
                 )
                 return
             }
-            
-            removePasscodeFromKeychain()
-            savePasscodePreference(false)
-            self.enablePasscode = false
-            
-            showToast(
-                message: "Passcode disabled.",
-                icon: "lock.slash.fill",
-                tintColor: .gray
-            )
+                        
+            Task {
+                try? await Task.sleep(for: .milliseconds(250))
+                self.navigateToPasscodeDisable = true
+            }
+            return
         }
+        
+        Task {
+            try? await Task.sleep(for: .milliseconds(250))
+            self.navigateToPasscodeSetup = true
+        }
+    }
+    
+    func confirmPasscodeDisableSuccess() {
+        removePasscodeFromKeychain()
+        savePasscodePreference(false)
+        self.enablePasscode = false
+        self.navigateToPasscodeDisable = false
+        
+        showToast(
+            message: "Passcode disabled.",
+            icon: "lock.slash.fill",
+            tintColor: .gray
+        )
+    }
+    
+    func handlePasscodeDisableDismissal() {
+        self.enablePasscode = UserDefaults.standard.bool(forKey: passcodeKey)
+        self.navigateToPasscodeDisable = false
     }
     
     func handlePasscodeDismissal() {

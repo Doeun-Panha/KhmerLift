@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct PasscodeSetupView: View {
+struct PasscodeView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel = PasscodeSetupViewModel()
+    @State private var viewModel: PasscodeViewModel
+    
     @State private var deleteTapCount = 0
     @State private var shakeAttempts = 0
     @State private var isError = false
@@ -21,9 +22,11 @@ struct PasscodeSetupView: View {
     let columns = Array(repeating: GridItem(.flexible(), spacing: 20), count: 3)
     
     init(
+        mode: PasscodeViewModel.Mode,
         onSuccess: (() -> Void)? = nil,
         onFailure: (() -> Void)? = nil
     ) {
+        self._viewModel = State(initialValue: PasscodeViewModel(mode: mode))
         self.onSuccess = onSuccess
         self.onFailure = onFailure
     }
@@ -109,12 +112,6 @@ struct PasscodeSetupView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .onChange(of: viewModel.isSuccess) { _, success in
-            if success {
-                onSuccess?()
-                dismiss()
-            }
-        }
         .onChange(of: viewModel.isSuccess) { _, success in
             if success {
                 withAnimation(.easeInOut(duration: 0.15)) {

@@ -79,17 +79,32 @@ struct MoreScreenView: View {
             .navigationDestination(
                 isPresented: $viewModel.navigateToPasscodeSetup,
             ) {
-                PasscodeSetupView(
-                    onSuccess: {
-                        viewModel.confirmPasscodeSetupSuccess()
-                    },
-                    onFailure: {
-                        viewModel.handlePasscodeDismissal()
-                    }
-                )
+                PasscodeView(mode: .setup) {
+                    viewModel.confirmPasscodeSetupSuccess()
+                } onFailure: {
+                    viewModel.handlePasscodeDismissal()
+                }
+            }
+            
+        }
+        .navigationDestination(
+            isPresented: $viewModel.navigateToPasscodeUnlock,
+        ) {
+            PasscodeView(mode: .unlock) {
+                viewModel.confirmFaceIDDisableSuccess()
+            } onFailure: {
+                viewModel.handleFaceIDDisableDismissal()
             }
         }
-        
+        .navigationDestination(
+            isPresented: $viewModel.navigateToPasscodeDisable,
+        ) {
+            PasscodeView(mode: .unlock) {
+                viewModel.confirmPasscodeDisableSuccess()
+            } onFailure: {
+                viewModel.handlePasscodeDisableDismissal()
+            }
+        }
         .alert("Face ID Not Set Up", isPresented: $viewModel.showSettingsAlert) {
             Button("Cancel", role: .cancel) { }
         } message: {

@@ -82,14 +82,11 @@ struct LockScreenView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea())
         .fullScreenCover(isPresented: $viewModel.showPasscodeSheet) {
-            PasscodeSetupView(
-                onSuccess: {
+            PasscodeView(mode: .unlock) {
                     viewModel.unlockApp()
-                },
-                onFailure: {
-                    viewModel.showPasscodeSheet = false
-                }
-            )
+            } onFailure: {
+                viewModel.showPasscodeSheet = false
+            }
         }
     }
 }
