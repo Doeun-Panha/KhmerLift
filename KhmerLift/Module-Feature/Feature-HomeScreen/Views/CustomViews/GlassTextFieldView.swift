@@ -9,6 +9,7 @@ import SwiftUI
 
 struct GlassTextFieldView: View {
     let cornerRadius: CGFloat = 32.0
+    
     let title: String
     let placeholder: String
     @Binding var text: String
@@ -16,6 +17,7 @@ struct GlassTextFieldView: View {
     var maxLength: Int = 6
     var maxDecimalPlaces: Int = 2
     var allowedRange: ClosedRange<Double>? = nil
+    
     var onExceedLimit: (() -> Void)? = nil
     var onOutOfRange: (() -> Void)? = nil
     

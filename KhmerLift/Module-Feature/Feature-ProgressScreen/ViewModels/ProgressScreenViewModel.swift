@@ -55,11 +55,6 @@ final class ProgressScreenViewModel {
         return nil
     }
     
-    func saveNewTargetWeight(_ newTarget: Double) {
-        bodyWeightService.saveTargetWeight(newTarget)
-        loadSummary()
-    }
-    
     var formattedCurrentTitle: String {
         guard let date = summary.latestLogDate else { return "Current" }
         let calendar = Calendar.current
@@ -90,5 +85,10 @@ final class ProgressScreenViewModel {
         guard let change = summary.monthlyChange else { return "-- kg" }
         let sign = change > 0 ? "+" : ""
         return "\(sign)\(String(format: "%.1f", change)) kg"
+    }
+    
+    func saveNewTargetWeight(_ newTarget: Double) {
+        bodyWeightService.saveTargetWeight(newTarget)
+        loadSummary()
     }
 }

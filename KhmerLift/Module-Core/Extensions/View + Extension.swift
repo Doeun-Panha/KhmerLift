@@ -18,12 +18,29 @@ extension View {
         }
     }
     
-    func triggerHaptic() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+    func triggerSuccessHaptic() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.success)
+    }
+    
+    func triggerWarningHaptic() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.warning)
+    }
+    
+    func triggerErrorHaptic() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.error)
     }
     
     func toast(_ config: ToastConfig?) -> some View {
         self.modifier(ToastModifier(config: config))
+    }
+    
+    func appBackground() -> some View {
+        modifier(AppBackgroundModifier())
     }
 }

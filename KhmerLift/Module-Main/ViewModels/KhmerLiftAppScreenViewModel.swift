@@ -34,32 +34,11 @@ final class KhmerLiftAppScreenViewModel {
     private let faceIDKey = "isFaceIDEnabled"
     private let passcodeKey = "isPasscodeEnabled"
     
-    private let backgroundKey = "selectedBackgroundFileName"
-    var selectedBackgroundFileName: String = "bike-video"
-    
     init(
         biometricService: BiometricServiceProtocol? = nil
     ) {
         let biometricService = biometricService ?? BiometricService()
         self.biometricService = biometricService
-        
-        self.selectedBackgroundFileName = UserDefaults.standard.string(forKey: backgroundKey) ?? "bike-video"
-        
-        NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.reloadBackgroundPreference()
-            }
-        }
-    }
-    private func reloadBackgroundPreference() {
-        let updatedBackground = UserDefaults.standard.string(forKey: backgroundKey) ?? "bike-video"
-        if selectedBackgroundFileName != updatedBackground {
-            selectedBackgroundFileName = updatedBackground
-        }
     }
     
     var isFaceIDEnabled: Bool {

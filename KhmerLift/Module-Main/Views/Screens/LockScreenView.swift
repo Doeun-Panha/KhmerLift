@@ -80,7 +80,7 @@ struct LockScreenView: View {
             .padding(.bottom, 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black.ignoresSafeArea())
+        
         .fullScreenCover(isPresented: $viewModel.showPasscodeSheet) {
             PasscodeView(mode: .unlock) {
                     viewModel.unlockApp()
@@ -88,5 +88,7 @@ struct LockScreenView: View {
                 viewModel.showPasscodeSheet = false
             }
         }
+        
+        .appBackground()
     }
 }

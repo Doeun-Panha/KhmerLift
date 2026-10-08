@@ -26,9 +26,6 @@ final class PasscodeViewModel {
     let mode: Mode
     let pinLength = 6
     
-    private let backgroundKey = "selectedBackgroundFileName"
-    var selectedBackgroundFileName: String = "bike-video"
-    
     private let passcodeKey = "isPasscodeEnabled"
     private(set) var setupStep: SetupStep = .create
     
@@ -37,8 +34,6 @@ final class PasscodeViewModel {
     
     var isSuccess: Bool = false
     var errorTrigger: Int = 0
-    
-    var toast: ToastConfig? = nil
     
     var titleText: String {
         switch mode {
@@ -50,29 +45,12 @@ final class PasscodeViewModel {
         }
     }
     
+    var toast: ToastConfig? = nil
+    
     init(
         mode: Mode
     ) {
         self.mode = mode
-        
-        self.selectedBackgroundFileName = UserDefaults.standard.string(forKey: backgroundKey) ?? "bike-video"
-        
-        NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.reloadBackgroundPreference()
-            }
-        }
-    }
-    
-    private func reloadBackgroundPreference() {
-        let updatedBackground = UserDefaults.standard.string(forKey: backgroundKey) ?? "bike-video"
-        if selectedBackgroundFileName != updatedBackground {
-            selectedBackgroundFileName = updatedBackground
-        }
     }
     
     func appendDigit(_ digit: String) {
@@ -105,9 +83,6 @@ final class PasscodeViewModel {
             firstPinAttempt = enteredPin
             enteredPin = ""
             setupStep = .confirm
-            
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
             
         case .confirm:
             if enteredPin == firstPinAttempt {

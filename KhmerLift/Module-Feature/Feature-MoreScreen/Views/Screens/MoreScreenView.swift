@@ -64,8 +64,9 @@ struct MoreScreenView: View {
             }
             .padding(.horizontal)
             .padding(.leading, 10)
+            
             .navigationDestination(
-                isPresented: $viewModel.navigateToFaceID,
+                isPresented: $viewModel.navigateToFaceIDSetup,
             ) {
                 FaceIDScreenView(
                     onSuccess: {
@@ -77,6 +78,15 @@ struct MoreScreenView: View {
                 )
             }
             .navigationDestination(
+                isPresented: $viewModel.navigateToFaceIDDisable,
+            ) {
+                PasscodeView(mode: .unlock) {
+                    viewModel.confirmFaceIDDisableSuccess()
+                } onFailure: {
+                    viewModel.handleFaceIDDisableDismissal()
+                }
+            }
+            .navigationDestination(
                 isPresented: $viewModel.navigateToPasscodeSetup,
             ) {
                 PasscodeView(mode: .setup) {
@@ -85,33 +95,24 @@ struct MoreScreenView: View {
                     viewModel.handlePasscodeDismissal()
                 }
             }
+            .navigationDestination(
+                isPresented: $viewModel.navigateToPasscodeDisable,
+            ) {
+                PasscodeView(mode: .unlock) {
+                    viewModel.confirmPasscodeDisableSuccess()
+                } onFailure: {
+                    viewModel.handlePasscodeDisableDismissal()
+                }
+            }
             
-        }
-        .navigationDestination(
-            isPresented: $viewModel.navigateToPasscodeUnlock,
-        ) {
-            PasscodeView(mode: .unlock) {
-                viewModel.confirmFaceIDDisableSuccess()
-            } onFailure: {
-                viewModel.handleFaceIDDisableDismissal()
+            .alert("Face ID Not Set Up", isPresented: $viewModel.showSettingsAlert) {
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Face ID is not set up on this device. Go to 'Settings' > 'Face ID & Passcode' > 'Set Up Face ID' to set it up.")
             }
+            
+            .toast(viewModel.toast)
         }
-        .navigationDestination(
-            isPresented: $viewModel.navigateToPasscodeDisable,
-        ) {
-            PasscodeView(mode: .unlock) {
-                viewModel.confirmPasscodeDisableSuccess()
-            } onFailure: {
-                viewModel.handlePasscodeDisableDismissal()
-            }
-        }
-        .alert("Face ID Not Set Up", isPresented: $viewModel.showSettingsAlert) {
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Face ID is not set up on this device. Go to 'Settings' > 'Face ID & Passcode' > 'Set Up Face ID' to set it up.")
-        }
-        .toast(viewModel.toast)
-        
     }
 }
 

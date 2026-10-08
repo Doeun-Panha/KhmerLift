@@ -32,86 +32,78 @@ struct PasscodeView: View {
     }
     
     var body: some View {
-        ZStack {
-            Image("background")
-                .resizable()
-                .ignoresSafeArea()
-            
-            VideoBackgroundView(name: viewModel.selectedBackgroundFileName, type: "mp4")
-                .ignoresSafeArea()
-            
-            VStack(spacing: 16) {
-                headerView
+        VStack(spacing: 16) {
+            headerView
 
-                VStack(spacing: 30) {
-                    Spacer()
-                    
-                    Text(viewModel.titleText)
-                        .font(.nunito(18, weight: .bold))
-                        .foregroundStyle(.white)
+            VStack(spacing: 30) {
+                Spacer()
+                
+                Text(viewModel.titleText)
+                    .font(.nunito(18, weight: .bold))
+                    .foregroundStyle(.white)
 
-                    Spacer()
-                    
-                    HStack(spacing: 16) {
-                        ForEach(0..<viewModel.pinLength, id: \.self) { index in
-                            Circle()
-                                .fill(
-                                    isSuccess
-                                        ? Color.green
-                                        : (isError
-                                            ? Color.red
-                                            : (index < viewModel.enteredPin.count ? Color.white : Color.white.opacity(0.2)))
-                                )
-                                .frame(width: 25, height: 25)
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.white.opacity(0.5), lineWidth: 1)
-                                )
-                                .scaleEffect(index < viewModel.enteredPin.count ? 1.1 : 1.0)
-                                .animation(.spring(response: 0.2), value: viewModel.enteredPin.count)
-                        }
+                Spacer()
+                
+                HStack(spacing: 16) {
+                    ForEach(0..<viewModel.pinLength, id: \.self) { index in
+                        Circle()
+                            .fill(
+                                isSuccess
+                                    ? Color.green
+                                    : (isError
+                                        ? Color.red
+                                        : (index < viewModel.enteredPin.count ? Color.white : Color.white.opacity(0.2)))
+                            )
+                            .frame(width: 25, height: 25)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                            )
+                            .scaleEffect(index < viewModel.enteredPin.count ? 1.1 : 1.0)
+                            .animation(.spring(response: 0.2), value: viewModel.enteredPin.count)
                     }
-                    .padding(.vertical, 10)
-                    .modifier(ShakeEffect(animatableData: CGFloat(shakeAttempts)))
-                    
-                    Spacer()
-                    
-                    LazyVGrid(columns: columns, spacing: 20) {
-                        ForEach(1...9, id: \.self) { num in
-                            numpadButton(label: "\(num)") {
-                                viewModel.appendDigit("\(num)")
-                            }
-                        }
-                        
-                        Spacer()
-                        
-                        numpadButton(label: "0") {
-                            viewModel.appendDigit("0")
-                        }
-                        
-                        Button(action: {
-                            viewModel.deleteDigit()
-                            deleteTapCount += 1
-                        }) {
-                            Image(systemName: "delete.left.fill")
-                                .font(.system(size: 20, weight: .medium))
-                                .foregroundStyle(.white)
-                                .frame(width: 75, height: 75)
-                                .symbolEffect(.bounce, value: deleteTapCount)
-                                .contentShape(Circle())
-                        }
-                        .buttonStyle(BouncyButtonStyle())
-                    }
-                    .padding()
                 }
-                .padding(.horizontal, 20)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+                .padding(.vertical, 10)
+                .modifier(ShakeEffect(animatableData: CGFloat(shakeAttempts)))
+                
+                Spacer()
+                
+                LazyVGrid(columns: columns, spacing: 20) {
+                    ForEach(1...9, id: \.self) { num in
+                        numpadButton(label: "\(num)") {
+                            viewModel.appendDigit("\(num)")
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    numpadButton(label: "0") {
+                        viewModel.appendDigit("0")
+                    }
+                    
+                    Button(action: {
+                        viewModel.deleteDigit()
+                        deleteTapCount += 1
+                    }) {
+                        Image(systemName: "delete.left.fill")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundStyle(.white)
+                            .frame(width: 75, height: 75)
+                            .symbolEffect(.bounce, value: deleteTapCount)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(BouncyButtonStyle())
+                }
+                .padding()
             }
+            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
         }
         .toolbar(.hidden, for: .navigationBar)
+        
         .onChange(of: viewModel.isSuccess) { _, success in
             if success {
                 withAnimation(.easeInOut(duration: 0.15)) {
@@ -125,6 +117,8 @@ struct PasscodeView: View {
             }
         }
         .onChange(of: viewModel.errorTrigger) { _, _ in
+            triggerErrorHaptic()
+            
             withAnimation(.easeInOut(duration: 0.1)) {
                 isError = true
             }
@@ -138,7 +132,9 @@ struct PasscodeView: View {
                 }
             }
         }
+        
         .toast(viewModel.toast)
+        .appBackground()
     }
     
     private var headerView: some View {
@@ -201,27 +197,5 @@ struct PasscodeView: View {
                 .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
         }
         .buttonStyle(BouncyButtonStyle())
-    }
-}
-
-struct BouncyButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
-            .animation(
-                .spring(response: 0.25, dampingFraction: 0.45, blendDuration: 0),
-                value: configuration.isPressed
-            )
-    }
-}
-
-struct ShakeEffect: GeometryEffect {
-    var travelDistance: CGFloat = 10
-    var shakesPerUnit: CGFloat = 3
-    var animatableData: CGFloat
-
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        let translationX = travelDistance * sin(animatableData * .pi * shakesPerUnit)
-        return ProjectionTransform(CGAffineTransform(translationX: translationX, y: 0))
     }
 }

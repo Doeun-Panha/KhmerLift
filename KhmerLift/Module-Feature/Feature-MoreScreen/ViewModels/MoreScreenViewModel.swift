@@ -4,18 +4,19 @@ import Observation
 @MainActor
 @Observable
 final class MoreScreenViewModel {
+    private let biometricService: BiometricServiceProtocol
+    
     private let selectedBackgroundKey = "selectedBackgroundFileName"
     
-    private let biometricService: BiometricServiceProtocol
+    var toast: ToastConfig? = nil
     
     private let faceIDKey = "isFaceIDEnabled"
     private let passcodeKey = "isPasscodeEnabled"
     
     var enableFaceID: Bool = false
-    var navigateToFaceID: Bool = false
-    var navigateToPasscodeUnlock: Bool = false
+    var navigateToFaceIDSetup: Bool = false
+    var navigateToFaceIDDisable: Bool = false
     var showSettingsAlert: Bool = false
-    var toast: ToastConfig? = nil
     
     var enablePasscode: Bool = false
     var navigateToPasscodeSetup = false
@@ -24,14 +25,6 @@ final class MoreScreenViewModel {
     var isAddinBackground: Bool = false
     var newBackgroundName: String = ""
     
-    let availableBackgrounds: [BackgroundModel] = [
-        BackgroundModel(id: "bike-video", name: "Bike", fileName: "bike-video", fileType: "mp4"),
-        BackgroundModel(id: "bike-nature-video", name: "Bike Nature", fileName: "bike-nature-video", fileType: "mp4"),
-        BackgroundModel(id: "berserker-nature-video", name: "Berserker", fileName: "berserker-nature-video", fileType: "mp4"),
-        BackgroundModel(id: "blackhole-video", name: "Blackhole", fileName: "blackhole-video", fileType: "mp4"),
-        BackgroundModel(id: "cycling-sunset-video", name: "Cycling Sunset", fileName: "cycling-sunset-video", fileType: "mp4"),
-    ]
-    
     var selectedBackground: BackgroundModel? {
         didSet {
             if let selectedBackground {
@@ -39,6 +32,14 @@ final class MoreScreenViewModel {
             }
         }
     }
+    
+    let availableBackgrounds: [BackgroundModel] = [
+        BackgroundModel(id: "bike-video", name: "Bike", fileName: "bike-video", fileType: "mp4"),
+        BackgroundModel(id: "bike-nature-video", name: "Bike Nature", fileName: "bike-nature-video", fileType: "mp4"),
+        BackgroundModel(id: "berserker-nature-video", name: "Berserker", fileName: "berserker-nature-video", fileType: "mp4"),
+        BackgroundModel(id: "blackhole-video", name: "Blackhole", fileName: "blackhole-video", fileType: "mp4"),
+        BackgroundModel(id: "cycling-sunset-video", name: "Cycling Sunset", fileName: "cycling-sunset-video", fileType: "mp4"),
+    ]
     
     init(
         biometricService: BiometricServiceProtocol? = nil
@@ -53,6 +54,18 @@ final class MoreScreenViewModel {
         self.selectedBackground = availableBackgrounds.first(where: { $0.fileName == savedFileName }) ?? availableBackgrounds.first
     }
     
+    func showToast(message: String, icon: String? = "info.circle.fill", tintColor: Color = .blue) {
+        let config = ToastConfig(message: message, icon: icon, tintColor: tintColor)
+        self.toast = config
+        
+        Task {
+            try? await Task.sleep(for: .seconds(3))
+            if self.toast == config {
+                self.toast = nil
+            }
+        }
+    }
+    
     func handleFaceIDToggleChange(_ isEnabled: Bool) {
         self.enableFaceID = isEnabled
         
@@ -62,7 +75,7 @@ final class MoreScreenViewModel {
             if wasPreviouslyEnabled {
                 Task {
                     try? await Task.sleep(for: .milliseconds(250))
-                    self.navigateToPasscodeUnlock = true
+                    self.navigateToFaceIDDisable = true
                 }
             } else {
                 saveFaceIDPreference(false)
@@ -89,7 +102,7 @@ final class MoreScreenViewModel {
         case .available:
             Task {
                 try? await Task.sleep(for: .milliseconds(250))
-                self.navigateToFaceID = true
+                self.navigateToFaceIDSetup = true
             }
             
         case .notEnrolled:
@@ -108,10 +121,22 @@ final class MoreScreenViewModel {
         }
     }
     
+    func confirmFaceIDSetupSuccess() {
+        saveFaceIDPreference(true)
+        self.enableFaceID = true
+        self.navigateToFaceIDSetup = false
+        
+        showToast(
+            message: "Face ID enabled successfully!",
+            icon: "checkmark.circle.fill",
+            tintColor: .green
+        )
+    }
+
     func confirmFaceIDDisableSuccess() {
         saveFaceIDPreference(false)
         self.enableFaceID = false
-        self.navigateToPasscodeUnlock = false
+        self.navigateToFaceIDDisable = false
         
         showToast(
             message: "Face ID disabled.",
@@ -122,24 +147,12 @@ final class MoreScreenViewModel {
     
     func handleFaceIDDisableDismissal() {
         self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
-        self.navigateToPasscodeUnlock = false
+        self.navigateToFaceIDDisable = false
     }
     
     func handleFaceIDDismissal() {
         self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
-        self.navigateToFaceID = false
-    }
-    
-    func confirmFaceIDSetupSuccess() {
-        saveFaceIDPreference(true)
-        self.enableFaceID = true
-        self.navigateToFaceID = false
-        
-        showToast(
-            message: "Face ID enabled successfully!",
-            icon: "checkmark.circle.fill",
-            tintColor: .green
-        )
+        self.navigateToFaceIDSetup = false
     }
     
     private func saveFaceIDPreference(_ enabled: Bool) {
@@ -174,6 +187,18 @@ final class MoreScreenViewModel {
         }
     }
     
+    func confirmPasscodeSetupSuccess() {
+        savePasscodePreference(true)
+        self.enablePasscode = true
+        self.navigateToPasscodeSetup = false
+
+        showToast(
+            message: "Passcode enabled successfully!",
+            icon: "checkmark.circle.fill",
+            tintColor: .green
+        )
+    }
+    
     func confirmPasscodeDisableSuccess() {
         removePasscodeFromKeychain()
         savePasscodePreference(false)
@@ -197,35 +222,11 @@ final class MoreScreenViewModel {
         self.navigateToPasscodeSetup = false
     }
     
-    func confirmPasscodeSetupSuccess() {
-        savePasscodePreference(true)
-        self.enablePasscode = true
-        self.navigateToPasscodeSetup = false
-
-        showToast(
-            message: "Passcode enabled successfully!",
-            icon: "checkmark.circle.fill",
-            tintColor: .green
-        )
-    }
-    
     private func savePasscodePreference(_ enabled: Bool) {
         UserDefaults.standard.set(enabled, forKey: passcodeKey)
     }
     
     private func removePasscodeFromKeychain() {
         _ = KeychainHelper.deletePasscode()
-    }
-    
-    func showToast(message: String, icon: String? = "info.circle.fill", tintColor: Color = .blue) {
-        let config = ToastConfig(message: message, icon: icon, tintColor: tintColor)
-        self.toast = config
-        
-        Task {
-            try? await Task.sleep(for: .seconds(3))
-            if self.toast == config {
-                self.toast = nil
-            }
-        }
     }
 }

@@ -17,12 +17,6 @@ final class HomeScreenViewModel {
     var title: String = "KhmerLift"
     var streakCount: Int = 0
     
-    var isAddingCategory: Bool = false
-    var newCategoryName: String = ""
-    
-    var isAddingExercise: Bool = false
-    var newExerciseName: String = ""
-    
     var bodyWeight: Double = 0.0
     var bodyWeightString: String {
         get { bodyWeight == 0 ? "" : String(bodyWeight) }
@@ -44,12 +38,18 @@ final class HomeScreenViewModel {
         }
     }
     
+    var isAddingCategory: Bool = false
+    var newCategoryName: String = ""
+    
     var exercises: [Exercise] = []
     var selectedExercise: Exercise? {
         didSet {
             updateLatestLogAndAutoPopulate()
         }
     }
+    
+    var isAddingExercise: Bool = false
+    var newExerciseName: String = ""
     
     private(set) var latestExerciseLog: ExerciseLog?
     
@@ -172,32 +172,6 @@ final class HomeScreenViewModel {
         }
     }
     
-    func logExerciseSet() {
-        guard isExerciseSetValid, let exercise = selectedExercise else { return }
-        
-        do {
-            try exerciseService.saveExerciseLog(
-                exercise: exercise.name,
-                weight: weight,
-                repetition: repetition
-            )
-            
-            self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
-            
-            showToast(
-                message: "Logged \(exercise.name) (\(weight)kg x \(repetition) reps)",
-                icon: "checkmark.circle.fill",
-                tintColor: .green
-            )
-        } catch {
-            showToast(
-                message: "Failed to log set.",
-                icon: "exclamationmark.triangle.fill",
-                tintColor: .red
-            )
-        }
-    }
-    
     func commitNewCategory() {
         let trimmedName = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
         defer { newCategoryName = "" }
@@ -242,6 +216,32 @@ final class HomeScreenViewModel {
     
     func cancelExerciseInput() {
         newExerciseName = ""
+    }
+    
+    func logExerciseSet() {
+        guard isExerciseSetValid, let exercise = selectedExercise else { return }
+        
+        do {
+            try exerciseService.saveExerciseLog(
+                exercise: exercise.name,
+                weight: weight,
+                repetition: repetition
+            )
+            
+            self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
+            
+            showToast(
+                message: "Logged \(exercise.name) (\(weight)kg x \(repetition) reps)",
+                icon: "checkmark.circle.fill",
+                tintColor: .green
+            )
+        } catch {
+            showToast(
+                message: "Failed to log set.",
+                icon: "exclamationmark.triangle.fill",
+                tintColor: .red
+            )
+        }
     }
     
     func showToast(

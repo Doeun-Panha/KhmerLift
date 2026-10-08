@@ -112,7 +112,7 @@ struct HomeScreenView: View {
                 },
                 onOutOfRange: {
                     viewModel.showToast(message: "Body weight must be between 20kg and 300kg.", tintColor: .red)
-                    triggerHaptic()
+                    triggerErrorHaptic()
                 }
             )
             .focused($focusedField, equals: .bodyWeight)
@@ -121,7 +121,7 @@ struct HomeScreenView: View {
             Button(action: {
                 focusedField = nil
                 viewModel.logBodyWeight()
-                triggerHaptic()
+                triggerSuccessHaptic()
             }) {
                 Text("Log Body Weight")
                     .font(.nunito(15, weight: .semibold))
@@ -141,10 +141,12 @@ struct HomeScreenView: View {
             
             HStack {
                 Spacer()
+                
                 Text("WORKOUT LOG")
                     .font(.nunito(18, weight: .bold))
                     .foregroundStyle(.white)
                     .tracking(1)
+                
                 Spacer()
             }
             
@@ -188,7 +190,7 @@ struct HomeScreenView: View {
                 },
                 onOutOfRange: {
                     viewModel.showToast(message: "Weight cannot exceed 500kg.", tintColor: .red)
-                    triggerHaptic()
+                    triggerErrorHaptic()
                 }
             )
             .focused($focusedField, equals: .weight)
@@ -206,7 +208,7 @@ struct HomeScreenView: View {
                 },
                 onOutOfRange: {
                     viewModel.showToast(message: "Reps must be between 1 and 200.", tintColor: .red)
-                    triggerHaptic()
+                    triggerErrorHaptic()
                 }
             )
             .focused($focusedField, equals: .repetition)
@@ -215,7 +217,7 @@ struct HomeScreenView: View {
             Button(action: {
                 focusedField = nil
                 viewModel.logExerciseSet()
-                triggerHaptic()
+                triggerSuccessHaptic()
             }) {
                 Text("Log Set")
                     .font(.nunito(15, weight: .semibold))
@@ -233,8 +235,10 @@ struct HomeScreenView: View {
         switch focusedField {
         case .bodyWeight:
             focusedField = nil
+            
         case .weight:
             focusedField = .repetition
+            
         case .repetition, .none:
             focusedField = nil
         }
@@ -242,6 +246,7 @@ struct HomeScreenView: View {
     
     private func scrollToFocusedField(_ field: FormField?, using proxy: ScrollViewProxy) {
         guard let field else { return }
+        
         Task {
             try? await Task.sleep(nanoseconds: 250_000_000)
             withAnimation(.easeInOut(duration: 0.25)) {

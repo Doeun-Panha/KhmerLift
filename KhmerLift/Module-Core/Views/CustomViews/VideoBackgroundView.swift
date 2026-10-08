@@ -99,7 +99,7 @@ class LoopingVideoUIView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        // Ensure all active and fading layers match view bounds
+        
         layer.sublayers?.forEach { sublayer in
             sublayer.frame = bounds
         }
