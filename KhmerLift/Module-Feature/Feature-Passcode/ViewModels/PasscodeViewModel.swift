@@ -53,7 +53,26 @@ final class PasscodeViewModel {
     ) {
         self.mode = mode
     }
-    
+}
+
+extension PasscodeViewModel {
+    func showToast(_ config: ToastConfig) {
+        toastTask?.cancel()
+        
+        self.toast = config
+        
+        toastTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            
+            if self.toast == config {
+                self.toast = nil
+            }
+        }
+    }
+}
+
+extension PasscodeViewModel {
     func appendDigit(_ digit: String) {
         guard enteredPin.count < pinLength else { return }
         enteredPin.append(digit)
@@ -125,20 +144,5 @@ final class PasscodeViewModel {
             UserDefaults.standard.set(true, forKey: passcodeKey)
         }
         return success
-    }
-    
-    func showToast(_ config: ToastConfig) {
-        toastTask?.cancel()
-        
-        self.toast = config
-        
-        toastTask = Task {
-            try? await Task.sleep(for: .seconds(3))
-            guard !Task.isCancelled else { return }
-            
-            if self.toast == config {
-                self.toast = nil
-            }
-        }
     }
 }

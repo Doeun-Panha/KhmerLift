@@ -11,6 +11,9 @@ import Observation
 @MainActor
 @Observable
 final class HomeScreenViewModel {
+    var toast: ToastConfig? = nil
+    private var toastTask: Task<Void, Never>?
+    
     private let bodyWeightService: BodyWeightServiceProtocol
     private let exerciseService: ExerciseServiceProtocol
     private let streakService: StreakServiceProtocol
@@ -102,9 +105,6 @@ final class HomeScreenViewModel {
         }
     }
     
-    var toast: ToastConfig? = nil
-    private var toastTask: Task<Void, Never>?
-    
     init(
         bodyWeightService: BodyWeightServiceProtocol? = nil,
         exerciseService: ExerciseServiceProtocol? = nil,
@@ -121,7 +121,60 @@ final class HomeScreenViewModel {
         
         loadInitialDataAndPreFill()
     }
+}
+
+extension HomeScreenViewModel {
+    enum ValidationLimits {
+        static let bodyWeight: ClosedRange<Double> = 20.0...300.0
+        static let exerciseWeight: ClosedRange<Double> = 0.0...500.0
+        static let repetition: ClosedRange<Int> = 1...200
+    }
     
+    var isBodyWeightValid: Bool {
+        ValidationLimits.bodyWeight.contains(bodyWeight)
+    }
+    
+    var isExerciseSetValid: Bool {
+        guard selectedExercise != nil else { return false }
+        
+        let isValidWeight = ValidationLimits.exerciseWeight.contains(weight)
+        let isValidReps = ValidationLimits.repetition.contains(repetition)
+        
+        return isValidWeight && isValidReps
+    }
+    
+    var validationErrorMessage: String? {
+        if bodyWeight > 0 && !ValidationLimits.bodyWeight.contains(bodyWeight) {
+            return "Body weight must be between 20 kg and 250 kg."
+        }
+        if weight > ValidationLimits.exerciseWeight.upperBound {
+            return "Weight cannot exceed 500 kg."
+        }
+        if repetition > ValidationLimits.repetition.upperBound {
+            return "Reps cannot exceed 100."
+        }
+        return nil
+    }
+}
+
+extension HomeScreenViewModel {
+    func showToast(_ config: ToastConfig) {
+        toastTask?.cancel()
+        
+        self.toast = config
+        
+        toastTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            
+            if self.toast == config {
+                self.toast = nil
+            }
+        }
+    }
+}
+
+extension HomeScreenViewModel {
     private func loadInitialDataAndPreFill() {
         self.categories = (try? exerciseService.fetchCategories()) ?? []
         self.exercises = (try? exerciseService.fetchExercises()) ?? []
@@ -167,7 +220,9 @@ final class HomeScreenViewModel {
         self.streakCount = status.count
         self.isLoggedToday = status.isLoggedToday
     }
-    
+}
+
+extension HomeScreenViewModel {
     func logBodyWeight() {
         guard isBodyWeightValid else { return }
         
@@ -180,6 +235,32 @@ final class HomeScreenViewModel {
         }
     }
     
+    func logExerciseSet() {
+        guard isExerciseSetValid, let exercise = selectedExercise else { return }
+        
+        do {
+            try exerciseService.saveExerciseLog(
+                exercise: exercise.name,
+                weight: weight,
+                repetition: repetition
+            )
+            
+            self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
+            updateStreak()
+            
+            let formattedWeight = weight.truncatingRemainder(dividingBy: 1) == 0
+                ? String(format: "%.0f", weight)
+                : String(format: "%.1f", weight)
+            
+            showToast(.success("Logged \(exercise.name) (\(formattedWeight) kg × \(repetition) reps)"))
+        } catch {
+            showToast(.error("Failed to log set."))
+        }
+    }
+
+}
+
+extension HomeScreenViewModel {
     func commitNewCategory() {
         let trimmedName = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
         defer { newCategoryName = "" }
@@ -216,77 +297,5 @@ final class HomeScreenViewModel {
     
     func cancelExerciseInput() {
         newExerciseName = ""
-    }
-    
-    func logExerciseSet() {
-        guard isExerciseSetValid, let exercise = selectedExercise else { return }
-        
-        do {
-            try exerciseService.saveExerciseLog(
-                exercise: exercise.name,
-                weight: weight,
-                repetition: repetition
-            )
-            
-            self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
-            updateStreak()
-            
-            let formattedWeight = weight.truncatingRemainder(dividingBy: 1) == 0
-                ? String(format: "%.0f", weight)
-                : String(format: "%.1f", weight)
-            
-            showToast(.success("Logged \(exercise.name) (\(formattedWeight) kg × \(repetition) reps)"))
-        } catch {
-            showToast(.error("Failed to log set."))
-        }
-    }
-    
-    func showToast(_ config: ToastConfig) {
-        toastTask?.cancel()
-        
-        self.toast = config
-        
-        toastTask = Task {
-            try? await Task.sleep(for: .seconds(3))
-            guard !Task.isCancelled else { return }
-            
-            if self.toast == config {
-                self.toast = nil
-            }
-        }
-    }
-}
-
-extension HomeScreenViewModel {
-    enum ValidationLimits {
-        static let bodyWeight: ClosedRange<Double> = 20.0...300.0
-        static let exerciseWeight: ClosedRange<Double> = 0.0...500.0
-        static let repetition: ClosedRange<Int> = 1...200
-    }
-    
-    var isBodyWeightValid: Bool {
-        ValidationLimits.bodyWeight.contains(bodyWeight)
-    }
-    
-    var isExerciseSetValid: Bool {
-        guard selectedExercise != nil else { return false }
-        
-        let isValidWeight = ValidationLimits.exerciseWeight.contains(weight)
-        let isValidReps = ValidationLimits.repetition.contains(repetition)
-        
-        return isValidWeight && isValidReps
-    }
-    
-    var validationErrorMessage: String? {
-        if bodyWeight > 0 && !ValidationLimits.bodyWeight.contains(bodyWeight) {
-            return "Body weight must be between 20 kg and 250 kg."
-        }
-        if weight > ValidationLimits.exerciseWeight.upperBound {
-            return "Weight cannot exceed 500 kg."
-        }
-        if repetition > ValidationLimits.repetition.upperBound {
-            return "Reps cannot exceed 100."
-        }
-        return nil
     }
 }

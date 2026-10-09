@@ -11,6 +11,12 @@ struct WeightSummaryCardView: View {
     let onEditTap: () -> Void
     
     var body: some View {
+        containerView
+    }
+}
+
+extension WeightSummaryCardView {
+    private var containerView: some View {
         VStack(spacing: 16) {
             HStack {
                 Text("Weight")

@@ -18,7 +18,9 @@ final class ProgressScreenViewModel {
     init(bodyWeightService: BodyWeightServiceProtocol? = nil) {
         self.bodyWeightService = bodyWeightService ?? BodyWeightService()
     }
-    
+}
+
+extension ProgressScreenViewModel {
     func loadSummary() {
         let targetWeight = bodyWeightService.fetchTargetWeight()
         let logs = bodyWeightService.fetchAllBodyWeightLogs()

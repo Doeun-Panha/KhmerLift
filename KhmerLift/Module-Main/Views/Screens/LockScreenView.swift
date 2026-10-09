@@ -11,6 +11,12 @@ struct LockScreenView: View {
     @Bindable var viewModel: KhmerLiftAppScreenViewModel
     
     var body: some View {
+        containerView
+    }
+}
+
+extension LockScreenView {
+    private var containerView: some View {
         VStack(spacing: 24) {
             VStack(spacing: 20) {
                 Image(systemName: "lock")
@@ -91,6 +97,7 @@ struct LockScreenView: View {
             .padding(.bottom, 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .appBackground()
         
         .fullScreenCover(isPresented: $viewModel.showPasscodeSheet) {
             PasscodeView(mode: .unlock) {
@@ -99,7 +106,5 @@ struct LockScreenView: View {
                 viewModel.showPasscodeSheet = false
             }
         }
-        
-        .appBackground()
     }
 }

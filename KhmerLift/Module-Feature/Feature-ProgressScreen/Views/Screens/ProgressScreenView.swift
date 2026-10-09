@@ -11,6 +11,12 @@ struct ProgressScreenView: View {
     @State private var inputWeightGoal: Double = 0.0
 
     var body: some View {
+        containerView
+    }
+}
+
+extension ProgressScreenView {
+    private var containerView: some View {
         VStack(alignment: .center, spacing: 16) {
             headerView
             

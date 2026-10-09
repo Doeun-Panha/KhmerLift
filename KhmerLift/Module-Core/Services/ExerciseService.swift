@@ -37,7 +37,9 @@ final class ExerciseService: ExerciseServiceProtocol {
 //            print("📍 SwiftData Database Path: \(url.path)")
 //        }
     }
-    
+}
+
+extension ExerciseService {
     func saveExerciseLog(exercise: String, weight: Double, repetition: Int) throws {
         let newLog = ExerciseLog(
             exercise: exercise,
@@ -63,7 +65,9 @@ final class ExerciseService: ExerciseServiceProtocol {
         )
         return (try? context.fetch(descriptor)) ?? []
     }
-    
+}
+
+extension ExerciseService {
     func saveCategory(_ category: MuscleCategory) throws {
         context.insert(category)
         try context.save()

@@ -19,14 +19,43 @@ struct HomeScreenView: View {
 
     var body: some View {
         @Bindable var viewModel = viewModel
+
+        containerView
+    }
+    
+    private func advanceFocus() {
+        switch focusedField {
+        case .bodyWeight:
+            focusedField = nil
+            
+        case .weight:
+            focusedField = .repetition
+            
+        case .repetition, .none:
+            focusedField = nil
+        }
+    }
+    
+    private func scrollToFocusedField(_ field: FormField?, using proxy: ScrollViewProxy) {
+        guard let field else { return }
         
+        Task {
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            withAnimation(.easeInOut(duration: 0.25)) {
+                proxy.scrollTo(field, anchor: .center)
+            }
+        }
+    }
+}
+
+extension HomeScreenView {
+    private var containerView: some View {
         VStack(alignment: .center, spacing: 16) {
             headerView
             
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
-                    formContentView
-                        .padding(.bottom, 120)
+                    contentView
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .onChange(of: focusedField) { _, newField in
@@ -85,7 +114,7 @@ struct HomeScreenView: View {
         .padding(.top, 30)
     }
     
-    private var formContentView: some View {
+    private var contentView: some View {
         VStack(spacing: 16) {
             HStack {
                 Spacer()
@@ -234,29 +263,6 @@ struct HomeScreenView: View {
             .disabled(!viewModel.isExerciseSetValid)
             .glassEffect(.clear, in: Capsule())
         }
-    }
-    
-    private func advanceFocus() {
-        switch focusedField {
-        case .bodyWeight:
-            focusedField = nil
-            
-        case .weight:
-            focusedField = .repetition
-            
-        case .repetition, .none:
-            focusedField = nil
-        }
-    }
-    
-    private func scrollToFocusedField(_ field: FormField?, using proxy: ScrollViewProxy) {
-        guard let field else { return }
-        
-        Task {
-            try? await Task.sleep(nanoseconds: 250_000_000)
-            withAnimation(.easeInOut(duration: 0.25)) {
-                proxy.scrollTo(field, anchor: .center)
-            }
-        }
+        .padding(.bottom, 120)
     }
 }

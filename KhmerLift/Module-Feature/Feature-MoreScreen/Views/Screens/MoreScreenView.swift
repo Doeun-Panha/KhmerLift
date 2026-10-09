@@ -12,6 +12,12 @@ struct MoreScreenView: View {
     @State private var viewModel = MoreScreenViewModel()
     
     var body: some View {
+        containerView
+    }
+}
+
+extension MoreScreenView {
+    private var containerView: some View {
         NavigationStack {
             VStack(alignment: .center, spacing: 16) {
                 HStack(spacing: 5) {
@@ -50,12 +56,12 @@ struct MoreScreenView: View {
                             )
                         )
                         
-                        GlassAccessoryButtonView(
-                            name: "My Face",
-                            assessory: "chevron.right"
-                        ) {
-                            
-                        }
+//                        GlassAccessoryButtonView(
+//                            name: "My Face",
+//                            assessory: "chevron.right"
+//                        ) {
+//
+//                        }
                         
                         GlassSwitchButtonView(
                             name: "Passcode",
@@ -71,7 +77,7 @@ struct MoreScreenView: View {
                             selection: $viewModel.selectedBackground,
                             items: viewModel.availableBackgrounds,
                             onAddNew: {
-                                viewModel.isAddinBackground = true
+                                viewModel.isAddingBackground = true
                             }
                         )
                     }

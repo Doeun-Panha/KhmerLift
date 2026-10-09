@@ -7,21 +7,23 @@
 
 import SwiftUI
 import Observation
+import PhotosUI
 
 @MainActor
 @Observable
 final class MoreScreenViewModel {
-    private let biometricService: BiometricServiceProtocol
-    
-    private let selectedBackgroundKey = "selectedBackgroundFileName"
-    private let selectedBackgroundTypeKey = "selectedBackgroundFileType"
+    private enum Keys {
+        static let selectedBackgroundFileName = "selectedBackgroundFileName"
+        static let selectedBackgroundFileType = "selectedBackgroundFileType"
+        static let faceID = "isFaceIDEnabled"
+        static let passcode = "isPasscodeEnabled"
+    }
     
     var toast: ToastConfig? = nil
     private var toastTask: Task<Void, Never>?
-    
-    private let faceIDKey = "isFaceIDEnabled"
-    private let passcodeKey = "isPasscodeEnabled"
-    
+
+    private let biometricService: BiometricServiceProtocol
+
     var enableFaceID: Bool = false
     var navigateToFaceIDSetup: Bool = false
     var navigateToFaceIDDisable: Bool = false
@@ -31,18 +33,6 @@ final class MoreScreenViewModel {
     var navigateToPasscodeSetup = false
     var navigateToPasscodeDisable: Bool = false
     
-    var isAddinBackground: Bool = false
-    var newBackgroundName: String = ""
-    
-    var selectedBackground: BackgroundModel? {
-        didSet {
-            if let selectedBackground {
-                UserDefaults.standard.set(selectedBackground.fileName, forKey: selectedBackgroundKey)
-                UserDefaults.standard.set(selectedBackground.fileType, forKey: selectedBackgroundTypeKey)
-            }
-        }
-    }
-    
     let availableBackgrounds: [BackgroundModel] = [
         BackgroundModel(id: "bike-video", name: "Bike", fileName: "bike-video", fileType: "mp4"),
         BackgroundModel(id: "bike-nature-video", name: "Bike Nature", fileName: "bike-nature-video", fileType: "mp4"),
@@ -51,19 +41,33 @@ final class MoreScreenViewModel {
         BackgroundModel(id: "cycling-sunset-video", name: "Cycling Sunset", fileName: "cycling-sunset-video", fileType: "mp4"),
     ]
     
+    var isAddingBackground: Bool = false
+    var newBackgroundName: String = ""
+    
+    var selectedBackground: BackgroundModel? {
+        didSet {
+            if let selectedBackground {
+                UserDefaults.standard.set(selectedBackground.fileName, forKey: Keys.selectedBackgroundFileName)
+                UserDefaults.standard.set(selectedBackground.fileType, forKey: Keys.selectedBackgroundFileType)
+            }
+        }
+    }
+    
     init(
         biometricService: BiometricServiceProtocol? = nil
     ) {
         let biometricService = biometricService ?? BiometricService()
         self.biometricService = biometricService
         
-        self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
-        self.enablePasscode = UserDefaults.standard.bool(forKey: passcodeKey)
+        self.enableFaceID = UserDefaults.standard.bool(forKey: Keys.faceID)
+        self.enablePasscode = UserDefaults.standard.bool(forKey: Keys.passcode)
         
-        let savedFileName = UserDefaults.standard.string(forKey: selectedBackgroundKey) ?? "bike-video"
+        let savedFileName = UserDefaults.standard.string(forKey: Keys.selectedBackgroundFileName) ?? "bike-video"
         self.selectedBackground = availableBackgrounds.first(where: { $0.fileName == savedFileName }) ?? availableBackgrounds.first
     }
-    
+}
+
+extension MoreScreenViewModel {
     func showToast(_ config: ToastConfig) {
         toastTask?.cancel()
         
@@ -78,12 +82,14 @@ final class MoreScreenViewModel {
             }
         }
     }
-    
+}
+
+extension MoreScreenViewModel {
     func handleFaceIDToggleChange(_ isEnabled: Bool) {
         self.enableFaceID = isEnabled
         
         if !isEnabled {
-            let wasPreviouslyEnabled = UserDefaults.standard.bool(forKey: faceIDKey)
+            let wasPreviouslyEnabled = UserDefaults.standard.bool(forKey: Keys.faceID)
             
             if wasPreviouslyEnabled {
                 Task {
@@ -143,19 +149,21 @@ final class MoreScreenViewModel {
     }
     
     func handleFaceIDDisableDismissal() {
-        self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
+        self.enableFaceID = UserDefaults.standard.bool(forKey: Keys.faceID)
         self.navigateToFaceIDDisable = false
     }
     
     func handleFaceIDDismissal() {
-        self.enableFaceID = UserDefaults.standard.bool(forKey: faceIDKey)
+        self.enableFaceID = UserDefaults.standard.bool(forKey: Keys.faceID)
         self.navigateToFaceIDSetup = false
     }
     
     private func saveFaceIDPreference(_ enabled: Bool) {
-        UserDefaults.standard.set(enabled, forKey: faceIDKey)
+        UserDefaults.standard.set(enabled, forKey: Keys.faceID)
     }
-    
+}
+
+extension MoreScreenViewModel {
     func handlePasscodeToggleChange(_ isEnabled: Bool) {
         self.enablePasscode = isEnabled
         
@@ -198,20 +206,24 @@ final class MoreScreenViewModel {
     }
     
     func handlePasscodeDisableDismissal() {
-        self.enablePasscode = UserDefaults.standard.bool(forKey: passcodeKey)
+        self.enablePasscode = UserDefaults.standard.bool(forKey: Keys.passcode)
         self.navigateToPasscodeDisable = false
     }
     
     func handlePasscodeDismissal() {
-        self.enablePasscode = UserDefaults.standard.bool(forKey: passcodeKey)
+        self.enablePasscode = UserDefaults.standard.bool(forKey: Keys.passcode)
         self.navigateToPasscodeSetup = false
     }
     
     private func savePasscodePreference(_ enabled: Bool) {
-        UserDefaults.standard.set(enabled, forKey: passcodeKey)
+        UserDefaults.standard.set(enabled, forKey: Keys.passcode)
     }
     
     private func removePasscodeFromKeychain() {
         _ = KeychainHelper.deletePasscode()
     }
+}
+
+extension MoreScreenViewModel {
+    
 }

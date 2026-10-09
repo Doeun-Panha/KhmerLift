@@ -24,6 +24,12 @@ struct GlassTextFieldView: View {
     @FocusState private var isFocused: Bool
     
     var body: some View {
+        containerView
+    }
+}
+
+extension GlassTextFieldView {
+    private var containerView: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.nunito(16, weight: .semibold))
@@ -66,7 +72,9 @@ struct GlassTextFieldView: View {
             }
         }
     }
-    
+}
+
+extension GlassTextFieldView {
     private func validateInput(oldValue: String, newValue: String) {
         guard !newValue.isEmpty else { return }
         
