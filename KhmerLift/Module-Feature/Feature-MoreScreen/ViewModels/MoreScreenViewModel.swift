@@ -4,20 +4,23 @@ import Observation
 @MainActor
 @Observable
 final class MoreScreenViewModel {
+    private let selectedBackgroundKey = "selectedBackgroundFileName"
+    
     private let biometricService: BiometricServiceProtocol
+    
     private let faceIDKey = "isFaceIDEnabled"
     private let passcodeKey = "isPasscodeEnabled"
-    private let selectedBackgroundKey = "selectedBackgroundFileName"
     
     var enableFaceID: Bool = false
     var navigateToFaceID: Bool = false
     var showSettingsAlert: Bool = false
     var toast: ToastConfig? = nil
     
+    var enablePasscode: Bool = false
+    var navigateToPasscodeSetup = false
+    
     var isAddinBackground: Bool = false
     var newBackgroundName: String = ""
-    
-    var enablePasscode: Bool = false
     
     let availableBackgrounds: [BackgroundModel] = [
         BackgroundModel(id: "bike-video", name: "Bike", fileName: "bike-video", fileType: "mp4"),
@@ -113,10 +116,48 @@ final class MoreScreenViewModel {
     
     func handlePasscodeToggleChange(_ isEnabled: Bool) {
         self.enablePasscode = isEnabled
+        
+        if isEnabled {
+            Task {
+                try? await Task.sleep(for: .milliseconds(250))
+                self.navigateToPasscodeSetup = true
+            }
+        } else {
+            removePasscodeFromKeychain()
+            savePasscodePreference(false)
+            self.enablePasscode = false
+            
+            showToast(
+                message: "Passcode disabled.",
+                icon: "lock.slash.fill",
+                tintColor: .gray
+            )
+        }
+    }
+    
+    func handlePasscodeDismissal() {
+        self.enablePasscode = UserDefaults.standard.bool(forKey: passcodeKey)
+        self.navigateToPasscodeSetup = false
+    }
+    
+    func confirmPasscodeSetupSuccess() {
+        savePasscodePreference(true)
+        self.enablePasscode = true
+        self.navigateToPasscodeSetup = false
+
+        showToast(
+            message: "Passcode enabled successfully!",
+            icon: "checkmark.circle.fill",
+            tintColor: .green
+        )
     }
     
     private func savePasscodePreference(_ enabled: Bool) {
         UserDefaults.standard.set(enabled, forKey: passcodeKey)
+    }
+    
+    private func removePasscodeFromKeychain() {
+        _ = KeychainHelper.deletePasscode()
     }
     
     func showToast(message: String, icon: String? = "info.circle.fill", tintColor: Color = .blue) {

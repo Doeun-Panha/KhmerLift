@@ -75,7 +75,6 @@ struct FaceIDScreenView: View {
         }
     }
 
-    // MARK: - Subviews
     private var headerView: some View {
         HStack(spacing: 12) {
             Button(action: cancelAndDismiss) {
@@ -89,7 +88,7 @@ struct FaceIDScreenView: View {
             .buttonStyle(.plain)
             .glassEffect(.clear)
 
-            Text("Verify Face")
+            Text("Face ID")
                 .font(.nunito(22, weight: .bold))
                 .foregroundStyle(.white)
 
