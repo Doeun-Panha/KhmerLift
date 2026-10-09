@@ -75,14 +75,12 @@ struct HomeScreenView: View {
             
             Text("\(viewModel.streakCount)")
                 .font(.nunito(20, weight: .medium))
-                .foregroundStyle(.gray)
+                .foregroundStyle(viewModel.isLoggedToday ? .orange : .gray)
             
-            Image("active-fire-icon")
-                .renderingMode(.template)
+            Image(viewModel.isLoggedToday ? "active-fire-icon" : "inactive-fire-icon")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 25, height: 25)
-                .foregroundStyle(.gray)
         }
         .padding(.top, 30)
     }

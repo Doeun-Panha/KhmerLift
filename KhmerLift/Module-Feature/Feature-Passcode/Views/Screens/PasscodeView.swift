@@ -52,7 +52,7 @@ struct PasscodeView: View {
                                     ? Color.green
                                     : (isError
                                         ? Color.red
-                                        : (index < viewModel.enteredPin.count ? Color.white : Color.white.opacity(0.2)))
+                                        : (index < viewModel.enteredPin.count ? Color.white : Color.white.opacity(0.15)))
                             )
                             .frame(width: 25, height: 25)
                             .overlay(

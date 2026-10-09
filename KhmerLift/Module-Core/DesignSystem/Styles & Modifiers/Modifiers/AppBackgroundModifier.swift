@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AppBackgroundModifier: ViewModifier {
     @AppStorage("selectedBackgroundFileName") private var backgroundFileName: String = "bike-video"
+    @AppStorage("selectedBackgroundFileType") private var backgroundFileType: String = "mp4"
 
     func body(content: Content) -> some View {
         ZStack {
@@ -16,7 +17,7 @@ struct AppBackgroundModifier: ViewModifier {
                 .resizable()
                 .ignoresSafeArea()
             
-            VideoBackgroundView(name: backgroundFileName, type: "mp4")
+            VideoBackgroundView(name: backgroundFileName, type: backgroundFileType)
                 .ignoresSafeArea()
             
             content
