@@ -13,9 +13,12 @@ import Observation
 final class HomeScreenViewModel {
     private let bodyWeightService: BodyWeightServiceProtocol
     private let exerciseService: ExerciseServiceProtocol
+    private let streakService: StreakServiceProtocol
     
     var title: String = "KhmerLift"
+    
     var streakCount: Int = 0
+    var isLoggedToday: Bool = false
     
     var bodyWeight: Double = 0.0
     var bodyWeightString: String {
@@ -104,7 +107,8 @@ final class HomeScreenViewModel {
     
     init(
         bodyWeightService: BodyWeightServiceProtocol? = nil,
-        exerciseService: ExerciseServiceProtocol? = nil
+        exerciseService: ExerciseServiceProtocol? = nil,
+        streakService: StreakServiceProtocol? = nil
     ) {
         let bodyWeightService = bodyWeightService ?? BodyWeightService()
         self.bodyWeightService = bodyWeightService
@@ -112,12 +116,17 @@ final class HomeScreenViewModel {
         let exerciseService = exerciseService ?? ExerciseService()
         self.exerciseService = exerciseService
         
+        let streakService = streakService ?? StreakService()
+        self.streakService = streakService
+        
         loadInitialDataAndPreFill()
     }
     
     private func loadInitialDataAndPreFill() {
         self.categories = (try? exerciseService.fetchCategories()) ?? []
         self.exercises = (try? exerciseService.fetchExercises()) ?? []
+        
+        updateStreak()
         
         if let latestBodyWeight = bodyWeightService.fetchLatestBodyWeight() {
             self.bodyWeight = latestBodyWeight
@@ -153,11 +162,18 @@ final class HomeScreenViewModel {
         }
     }
     
+    private func updateStreak() {
+        let status = streakService.fetchStreakStatus()
+        self.streakCount = status.count
+        self.isLoggedToday = status.isLoggedToday
+    }
+    
     func logBodyWeight() {
         guard isBodyWeightValid else { return }
         
         do {
             try bodyWeightService.saveBodyWeight(bodyWeight)
+            updateStreak()
             showToast(.success("Body weight saved!"))
         } catch {
             showToast(.error("Failed to save body weight."))
@@ -213,6 +229,7 @@ final class HomeScreenViewModel {
             )
             
             self.latestExerciseLog = exerciseService.fetchLatestExerciseLog(for: exercise.name)
+            updateStreak()
             
             let formattedWeight = weight.truncatingRemainder(dividingBy: 1) == 0
                 ? String(format: "%.0f", weight)

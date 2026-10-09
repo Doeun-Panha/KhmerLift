@@ -12,7 +12,7 @@ struct VideoBackgroundView: UIViewRepresentable {
     let videoName: String
     let videoType: String
     
-    init(name: String, type: String = "mp4") {
+    init(name: String, type: String) {
         self.videoName = name
         self.videoType = type
     }

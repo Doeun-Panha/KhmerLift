@@ -14,6 +14,7 @@ final class MoreScreenViewModel {
     private let biometricService: BiometricServiceProtocol
     
     private let selectedBackgroundKey = "selectedBackgroundFileName"
+    private let selectedBackgroundTypeKey = "selectedBackgroundFileType"
     
     var toast: ToastConfig? = nil
     private var toastTask: Task<Void, Never>?
@@ -37,6 +38,7 @@ final class MoreScreenViewModel {
         didSet {
             if let selectedBackground {
                 UserDefaults.standard.set(selectedBackground.fileName, forKey: selectedBackgroundKey)
+                UserDefaults.standard.set(selectedBackground.fileType, forKey: selectedBackgroundTypeKey)
             }
         }
     }
@@ -44,7 +46,7 @@ final class MoreScreenViewModel {
     let availableBackgrounds: [BackgroundModel] = [
         BackgroundModel(id: "bike-video", name: "Bike", fileName: "bike-video", fileType: "mp4"),
         BackgroundModel(id: "bike-nature-video", name: "Bike Nature", fileName: "bike-nature-video", fileType: "mp4"),
-        BackgroundModel(id: "berserker-nature-video", name: "Berserker", fileName: "berserker-nature-video", fileType: "mp4"),
+        BackgroundModel(id: "mid-night-video", name: "Mid Night", fileName: "mid-night-video", fileType: "mov"),
         BackgroundModel(id: "blackhole-video", name: "Blackhole", fileName: "blackhole-video", fileType: "mp4"),
         BackgroundModel(id: "cycling-sunset-video", name: "Cycling Sunset", fileName: "cycling-sunset-video", fileType: "mp4"),
     ]
