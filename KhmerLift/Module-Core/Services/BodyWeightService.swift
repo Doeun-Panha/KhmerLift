@@ -26,14 +26,16 @@ final class BodyWeightService: BodyWeightServiceProtocol {
     private let targetWeightKey = "targetBodyWeight"
 
     
-    init(modelContainer: ModelContainer? = nil) {
+    init(
+        modelContainer: ModelContainer? = nil
+    ) {
         let container = modelContainer ?? SwiftDataContainer.shared
         self.modelContainer = container
         self.context = container.mainContext
                 
-        if let url = container.configurations.first?.url {
-            print("📍 SwiftData Database Path: \(url.path)")
-        }
+//        if let url = container.configurations.first?.url {
+//            print("📍 SwiftData Database Path: \(url.path)")
+//        }
     }
     
     func saveBodyWeight(_ weight: Double) throws {

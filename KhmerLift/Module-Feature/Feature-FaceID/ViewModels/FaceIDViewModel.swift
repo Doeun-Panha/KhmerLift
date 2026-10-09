@@ -10,9 +10,6 @@ import Combine
 
 @MainActor
 final class FaceIDViewModel: ObservableObject {
-    private let backgroundKey = "selectedBackgroundFileName"
-    var selectedBackgroundFileName: String = "bike-video"
-    
     private let biometricService: BiometricServiceProtocol
     let cameraManager = CameraManager()
     
@@ -29,35 +26,17 @@ final class FaceIDViewModel: ObservableObject {
     
     init(
         biometricService: BiometricServiceProtocol? = nil,
-        initialTimer: Int = 19,
+        initialTimer: Int = 30,
         initialStatus: String = "No face detected",
         onSuccess: (() -> Void)? = nil,
         onFailure: (() -> Void)? = nil
     ) {
-        self.selectedBackgroundFileName = UserDefaults.standard.string(forKey: backgroundKey) ?? "bike-video"
         let biometricService = biometricService ?? BiometricService()
         self.biometricService = biometricService
         self.timer = initialTimer
         self.status = initialStatus
         self.onSuccess = onSuccess
         self.onFailure = onFailure
-        
-        NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.reloadBackgroundPreference()
-            }
-        }
-    }
-    
-    private func reloadBackgroundPreference() {
-        let updatedBackground = UserDefaults.standard.string(forKey: backgroundKey) ?? "bike-video"
-        if selectedBackgroundFileName != updatedBackground {
-            selectedBackgroundFileName = updatedBackground
-        }
     }
     
     func onViewAppear() {

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MoreScreenView: View {
+    @Environment(KhmerLiftAppScreenViewModel.self) private var appViewModel
     @State private var viewModel = MoreScreenViewModel()
     
     var body: some View {
@@ -19,6 +20,22 @@ struct MoreScreenView: View {
                         .foregroundStyle(.white)
                     
                     Spacer()
+                    
+                    Button(action: {
+                        appViewModel.lockApp()
+                        triggerWarningHaptic()
+                    }) {
+                        Image(systemName: "lock")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .clipShape(Circle())
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(BouncyButtonStyle())
+                    .glassEffect(.clear)
+                    .disabled(!appViewModel.isLockEnabled)
+                    .opacity(appViewModel.isLockEnabled ? 1.0 : 0.5)
                 }
                 .padding(.top, 30)
                 
@@ -64,8 +81,9 @@ struct MoreScreenView: View {
             }
             .padding(.horizontal)
             .padding(.leading, 10)
+            
             .navigationDestination(
-                isPresented: $viewModel.navigateToFaceID,
+                isPresented: $viewModel.navigateToFaceIDSetup,
             ) {
                 FaceIDScreenView(
                     onSuccess: {
@@ -77,26 +95,41 @@ struct MoreScreenView: View {
                 )
             }
             .navigationDestination(
+                isPresented: $viewModel.navigateToFaceIDDisable,
+            ) {
+                PasscodeView(mode: .unlock) {
+                    viewModel.confirmFaceIDDisableSuccess()
+                } onFailure: {
+                    viewModel.handleFaceIDDisableDismissal()
+                }
+            }
+            .navigationDestination(
                 isPresented: $viewModel.navigateToPasscodeSetup,
             ) {
-                PasscodeSetupView(
-                    onSuccess: {
-                        viewModel.confirmPasscodeSetupSuccess()
-                    },
-                    onFailure: {
-                        viewModel.handlePasscodeDismissal()
-                    }
-                )
+                PasscodeView(mode: .setup) {
+                    viewModel.confirmPasscodeSetupSuccess()
+                } onFailure: {
+                    viewModel.handlePasscodeDismissal()
+                }
             }
+            .navigationDestination(
+                isPresented: $viewModel.navigateToPasscodeDisable,
+            ) {
+                PasscodeView(mode: .unlock) {
+                    viewModel.confirmPasscodeDisableSuccess()
+                } onFailure: {
+                    viewModel.handlePasscodeDisableDismissal()
+                }
+            }
+            
+            .alert("Face ID Not Set Up", isPresented: $viewModel.showSettingsAlert) {
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Face ID is not set up on this device. Go to 'Settings' > 'Face ID & Passcode' > 'Set Up Face ID' to set it up.")
+            }
+            
+            .toast(viewModel.toast)
         }
-        
-        .alert("Face ID Not Set Up", isPresented: $viewModel.showSettingsAlert) {
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Face ID is not set up on this device. Go to 'Settings' > 'Face ID & Passcode' > 'Set Up Face ID' to set it up.")
-        }
-        .toast(viewModel.toast)
-        
     }
 }
 

@@ -1,27 +1,27 @@
-//
-//  KeychainHelper.swift
-//  KhmerLift
-//
-//  Created by Panha on 7/10/26.
-//
-
 import Foundation
 import Security
 
 public enum KeychainHelper {
     private static let passcodeKey = "user_app_passcode"
     
+    @discardableResult
     public static func savePasscode(_ passcode: String) -> Bool {
         guard let data = passcode.data(using: .utf8) else { return false }
         
-        let query: [String: Any] = [
+        let deleteQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: passcodeKey
+        ]
+        SecItemDelete(deleteQuery as CFDictionary)
+        
+        let addQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: passcodeKey,
-            kSecValueData as String: data
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         ]
         
-        SecItemDelete(query as CFDictionary)
-        return SecItemAdd(query as CFDictionary, nil) == errSecSuccess
+        return SecItemAdd(addQuery as CFDictionary, nil) == errSecSuccess
     }
     
     public static func getPasscode() -> String? {
@@ -42,6 +42,7 @@ public enum KeychainHelper {
         return nil
     }
     
+    @discardableResult
     public static func deletePasscode() -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

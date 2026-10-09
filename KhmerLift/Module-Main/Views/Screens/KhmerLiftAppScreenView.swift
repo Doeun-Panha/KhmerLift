@@ -31,9 +31,12 @@ struct KhmerLiftAppScreenView: App {
                     MainScreenView()
                 }
             }
+            .environment(viewModel)
+            
             .task {
                 await viewModel.checkAppLockOnLaunch()
             }
+            
             .onChange(of: scenePhase) { _, newPhase in
                 viewModel.handleScenePhaseChange(newPhase)
             }

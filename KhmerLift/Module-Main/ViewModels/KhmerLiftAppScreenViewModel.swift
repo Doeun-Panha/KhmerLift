@@ -19,10 +19,21 @@ final class KhmerLiftAppScreenViewModel {
     
     var lockState: LockState = .checking
     var errorMessage: String? = nil
+    
+    var showPasscodeSheet: Bool = false {
+        didSet {
+            if showPasscodeSheet {
+                biometricService.cancelAuthentication()
+            }
+        }
+    }
     private(set) var isAuthenticating: Bool = false
+    private var hasAutoAttemptedFaceID: Bool = false
+    private var hasEnteredBackground: Bool = false
     
     private let biometricService: BiometricServiceProtocol
     private let faceIDKey = "isFaceIDEnabled"
+    private let passcodeKey = "isPasscodeEnabled"
     
     init(
         biometricService: BiometricServiceProtocol? = nil
@@ -35,17 +46,31 @@ final class KhmerLiftAppScreenViewModel {
         UserDefaults.standard.bool(forKey: faceIDKey)
     }
     
+    var isPasscodeEnabled: Bool {
+        UserDefaults.standard.bool(forKey: passcodeKey)
+    }
+    
+    var isLockEnabled: Bool {
+        isFaceIDEnabled || isPasscodeEnabled
+    }
+    
     func checkAppLockOnLaunch() async {
-        guard isFaceIDEnabled else {
+        guard isLockEnabled else {
             lockState = .unlocked
             return
         }
         
         lockState = .locked
-        await authenticate()
+        
+        if isFaceIDEnabled {
+            hasAutoAttemptedFaceID = true
+            await authenticateWithFaceID()
+        } else {
+            showPasscodeSheet = true
+        }
     }
     
-    func authenticate() async {
+    func authenticateWithFaceID() async {
         guard !isAuthenticating else { return }
         
         isAuthenticating = true
@@ -61,7 +86,7 @@ final class KhmerLiftAppScreenViewModel {
         do {
             let success = try await biometricService.authenticate(reason: "Unlock KhmerLift to continue")
             if success {
-                lockState = .unlocked
+                unlockApp()
             } else {
                 errorMessage = "Authentication failed. Try again."
             }
@@ -70,13 +95,40 @@ final class KhmerLiftAppScreenViewModel {
         }
     }
     
+    func unlockApp() {
+        lockState = .unlocked
+        showPasscodeSheet = false
+        hasAutoAttemptedFaceID = false
+        errorMessage = nil
+    }
+    
     func handleScenePhaseChange(_ newPhase: ScenePhase) {
-        guard isFaceIDEnabled else { return }
+        guard isLockEnabled else { return }
         
         if newPhase == .background {
             lockState = .locked
+            showPasscodeSheet = false
+            hasAutoAttemptedFaceID = false
+            hasEnteredBackground = true
+            biometricService.cancelAuthentication()
         } else if newPhase == .active && lockState == .locked {
-            Task { await authenticate() }
+            guard hasEnteredBackground else { return }
+            hasEnteredBackground = false
+            
+            if isFaceIDEnabled && !hasAutoAttemptedFaceID && !showPasscodeSheet {
+                hasAutoAttemptedFaceID = true
+                Task { await authenticateWithFaceID() }
+            } else if isPasscodeEnabled {
+                showPasscodeSheet = true
+            }
         }
+    }
+    
+    func lockApp() {
+        guard isLockEnabled else { return }
+        
+        lockState = .locked
+        showPasscodeSheet = false
+        biometricService.cancelAuthentication()
     }
 }

@@ -26,42 +26,34 @@ struct FaceIDScreenView: View {
     }
 
     var body: some View {
-        ZStack {
-            Image("background")
-                .resizable()
-                .ignoresSafeArea()
+        VStack(spacing: 16) {
+            headerView
 
-            VideoBackgroundView(name: viewModel.selectedBackgroundFileName, type: "mp4")
-                .ignoresSafeArea()
+            VStack(spacing: 30) {
+                cameraPreviewSection
 
-            VStack(spacing: 16) {
-                headerView
+                Text("\(viewModel.timer) s")
+                    .font(.nunito(18, weight: .bold))
+                    .foregroundStyle(.white)
 
-                VStack(spacing: 30) {
-                    cameraPreviewSection
+                Text(viewModel.status)
+                    .font(.nunito(16, weight: .semibold))
+                    .foregroundStyle(.white)
 
-                    Text("\(viewModel.timer) s")
-                        .font(.nunito(18, weight: .bold))
-                        .foregroundStyle(.white)
+                instructionIconsRow
 
-                    Text(viewModel.status)
-                        .font(.nunito(16, weight: .semibold))
-                        .foregroundStyle(.white)
+                muteButton
 
-                    instructionIconsRow
-
-                    muteButton
-
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+                Spacer()
             }
+            .padding(.horizontal, 20)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
         .toolbar(.hidden, for: .navigationBar)
+        
         .onAppear {
             viewModel.onViewAppear()
         }
@@ -73,6 +65,7 @@ struct FaceIDScreenView: View {
                 dismiss()
             }
         }
+        .appBackground()
     }
 
     private var headerView: some View {
