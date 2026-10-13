@@ -60,10 +60,10 @@ extension LockScreenView {
                             Text("Unlock with Face ID")
                         }
                         .font(.headline)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(Color.cyan)
+                        .background(Color.cyan.opacity(0.25))
                         .clipShape(Capsule())
                     }
                     .glassEffect(.clear, in: Capsule())
@@ -86,7 +86,7 @@ extension LockScreenView {
                         .background(
                             viewModel.isFaceIDEnabled
                                 ? .clear
-                                : Color.blue.opacity(0.15)
+                                : Color.cyan.opacity(0.25)
                         )
                         .clipShape(Capsule())
                     }

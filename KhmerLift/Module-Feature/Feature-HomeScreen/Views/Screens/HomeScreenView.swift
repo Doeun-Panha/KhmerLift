@@ -158,7 +158,7 @@ extension HomeScreenView {
                         .padding(.vertical, 12.5)
                         .contentShape(Rectangle())
                 }
-                .background(Color.blue.opacity(0.15))
+                .background(Color.cyan.opacity(0.25))
                 .clipShape(Capsule())
             }
             .buttonStyle(.plain)
@@ -256,7 +256,7 @@ extension HomeScreenView {
                         .padding(.vertical, 12.5)
                         .contentShape(Rectangle())
                 }
-                .background(Color.blue.opacity(0.15))
+                .background(Color.cyan.opacity(0.25))
                 .clipShape(Capsule())
             }
             .buttonStyle(.plain)
