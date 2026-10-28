@@ -106,10 +106,19 @@ extension HomeScreenView {
                 .font(.nunito(20, weight: .medium))
                 .foregroundStyle(viewModel.isLoggedToday ? .orange : .gray)
             
-            Image(viewModel.isLoggedToday ? "active-fire-icon" : "inactive-fire-icon")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 25, height: 25)
+            if viewModel.isLoggedToday {
+                Image("active-fire-icon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+            } else {
+                Image("inactive-fire-icon")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+                    .foregroundStyle(.gray)
+            }
         }
         .padding(.top, 30)
     }
