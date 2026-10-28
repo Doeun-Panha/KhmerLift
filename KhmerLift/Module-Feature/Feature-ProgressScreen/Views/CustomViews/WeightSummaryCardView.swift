@@ -107,9 +107,22 @@ extension WeightSummaryCardView {
                     .frame(height: 200)
                     .clipped()
                 } else {
-                    Text("Not Enough Data")
-                        .font(.nunito(14, weight: .light))
-                        .foregroundStyle(.gray)
+                    VStack {
+                        Spacer()
+                        
+                        Image(systemName: "chart.bar.xaxis")
+                            .font(.system(size: 48))
+                            .foregroundColor(.white.opacity(0.75))
+                        
+                        Text("Not Enough Data")
+                            .font(.nunito(16, weight: .light))
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white.opacity(0.75))
+                        
+                        Spacer()
+                    }
+                    
+                    Spacer()
                 }
             }
             

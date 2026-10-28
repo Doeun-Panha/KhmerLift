@@ -52,7 +52,7 @@ extension GlassDropdownView {
                 HStack {
                     Text(selection?.displayName ?? placeholder)
                         .font(.nunito(16, weight: .semibold))
-                        .foregroundStyle(selection == nil ? .gray : .white)
+                        .foregroundStyle(selection == nil ? .white.opacity(0.5) : .white)
                     
                     Spacer()
                     

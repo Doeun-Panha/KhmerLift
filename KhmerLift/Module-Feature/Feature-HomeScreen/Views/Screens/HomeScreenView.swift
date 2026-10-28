@@ -104,7 +104,7 @@ extension HomeScreenView {
             
             Text("\(viewModel.streakCount)")
                 .font(.nunito(20, weight: .medium))
-                .foregroundStyle(viewModel.isLoggedToday ? .orange : .gray)
+                .foregroundStyle(viewModel.isLoggedToday ? .orange : .white.opacity(0.75))
             
             if viewModel.isLoggedToday {
                 Image("active-fire-icon")
@@ -117,7 +117,7 @@ extension HomeScreenView {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 25, height: 25)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(.white.opacity(0.75))
             }
         }
         .padding(.top, 30)
