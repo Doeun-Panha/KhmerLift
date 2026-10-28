@@ -34,6 +34,12 @@ struct GlassDropdownView<T: SelectableItem>: View {
     }
     
     var body: some View {
+        containerView
+    }
+}
+
+extension GlassDropdownView {
+    private var containerView: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.nunito(16, weight: .semibold))
@@ -60,72 +66,77 @@ struct GlassDropdownView<T: SelectableItem>: View {
             .disabled(isDisabled)
             .opacity(isDisabled ? 0.5 : 1.0)
         }
+        
         .sheet(isPresented: $isShowingSheet) {
-            VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    
-                    Text("Select \(title)")
-                        .font(.nunito(18, weight: .bold))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                }
-                .padding([.top, .horizontal], 20)
+            sheet
+        }
+    }
+    
+    private var sheet: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
                 
-                Divider()
-                    .background(.white.opacity(0.4))
-                    .padding(.top, 12)
+                Text("Select \(title)")
+                    .font(.nunito(18, weight: .bold))
+                    .foregroundStyle(.white)
                 
-                ScrollView {
-                    VStack(spacing: 8) {
-                        ForEach(items) { item in
-                            Button(action: {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selection = item
-                                    isShowingSheet = false
-                                }
-                            }) {
-                                HStack {
-                                    Text(item.displayName)
-                                        .font(.nunito(16, weight: .medium))
-                                        .foregroundStyle(.white)
-                                    Spacer()
-                                    if selection == item {
-                                        Image(systemName: "checkmark")
-                                            .font(.system(size: 14, weight: .bold))
-                                            .foregroundStyle(.cyan)
-                                    }
-                                }
-                                .padding()
+                Spacer()
+            }
+            .padding([.top, .horizontal], 20)
+            
+            Divider()
+                .background(.white.opacity(0.4))
+                .padding(.top, 12)
+            
+            ScrollView {
+                VStack(spacing: 8) {
+                    ForEach(items) { item in
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selection = item
+                                isShowingSheet = false
                             }
+                        }) {
+                            HStack {
+                                Text(item.displayName)
+                                    .font(.nunito(16, weight: .medium))
+                                    .foregroundStyle(.white)
+                                Spacer()
+                                if selection == item {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(.cyan)
+                                }
+                            }
+                            .padding()
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 12)
-                }
-                
-                VStack {
-                    Button(action: {
-                        isShowingSheet = false
-                        onAddNew()
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "plus")
-                            Text("Add New \(title)")
-                        }
-                        .font(.nunito(16, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                    }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal)
+                .padding(.top, 12)
             }
-            .frame(maxWidth: .infinity)
-            .ignoresSafeArea(.all, edges: .horizontal)
-            .presentationDetents([.medium, .fraction(0.7)])
+            
+            VStack {
+                Button(action: {
+                    isShowingSheet = false
+                    onAddNew()
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus")
+                        Text("Add New \(title)")
+                    }
+                    .font(.nunito(16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal)
         }
+        .frame(maxWidth: .infinity)
+        .ignoresSafeArea(.all, edges: .horizontal)
+        .presentationDetents([.medium, .fraction(0.7)])
     }
 }

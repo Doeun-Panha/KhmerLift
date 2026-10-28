@@ -32,6 +32,12 @@ struct PasscodeView: View {
     }
     
     var body: some View {
+        containerView
+    }
+}
+
+extension PasscodeView {
+    private var containerView: some View {
         VStack(spacing: 16) {
             headerView
 
@@ -44,57 +50,11 @@ struct PasscodeView: View {
 
                 Spacer()
                 
-                HStack(spacing: 16) {
-                    ForEach(0..<viewModel.pinLength, id: \.self) { index in
-                        Circle()
-                            .fill(
-                                isSuccess
-                                    ? Color.green
-                                    : (isError
-                                        ? Color.red
-                                        : (index < viewModel.enteredPin.count ? Color.white : Color.white.opacity(0.15)))
-                            )
-                            .frame(width: 25, height: 25)
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.white.opacity(0.5), lineWidth: 1)
-                            )
-                            .scaleEffect(index < viewModel.enteredPin.count ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.2), value: viewModel.enteredPin.count)
-                    }
-                }
-                .padding(.vertical, 10)
-                .modifier(ShakeEffect(animatableData: CGFloat(shakeAttempts)))
+                pinRow
                 
                 Spacer()
                 
-                LazyVGrid(columns: columns, spacing: 20) {
-                    ForEach(1...9, id: \.self) { num in
-                        numpadButton(label: "\(num)") {
-                            viewModel.appendDigit("\(num)")
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    numpadButton(label: "0") {
-                        viewModel.appendDigit("0")
-                    }
-                    
-                    Button(action: {
-                        viewModel.deleteDigit()
-                        deleteTapCount += 1
-                    }) {
-                        Image(systemName: "delete.left.fill")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(.white)
-                            .frame(width: 75, height: 75)
-                            .symbolEffect(.bounce, value: deleteTapCount)
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(BouncyButtonStyle())
-                }
-                .padding()
+                numpad
             }
             .padding(.horizontal, 20)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -109,6 +69,8 @@ struct PasscodeView: View {
             .padding(.bottom, 16)
         }
         .toolbar(.hidden, for: .navigationBar)
+        .appBackground()
+        .toast(viewModel.toast)
         
         .onChange(of: viewModel.isSuccess) { _, success in
             if success {
@@ -140,9 +102,6 @@ struct PasscodeView: View {
                 }
             }
         }
-        
-        .toast(viewModel.toast)
-        .appBackground()
     }
     
     private var headerView: some View {
@@ -181,6 +140,60 @@ struct PasscodeView: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
+    }
+    
+    private var pinRow: some View {
+        HStack(spacing: 16) {
+            ForEach(0..<viewModel.pinLength, id: \.self) { index in
+                Circle()
+                    .fill(
+                        isSuccess
+                            ? Color.green
+                            : (isError
+                                ? Color.red
+                                : (index < viewModel.enteredPin.count ? Color.white : Color.white.opacity(0.15)))
+                    )
+                    .frame(width: 25, height: 25)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                    )
+                    .scaleEffect(index < viewModel.enteredPin.count ? 1.1 : 1.0)
+                    .animation(.spring(response: 0.2), value: viewModel.enteredPin.count)
+            }
+        }
+        .padding(.vertical, 10)
+        .modifier(ShakeEffect(animatableData: CGFloat(shakeAttempts)))
+    }
+    
+    private var numpad: some View {
+        LazyVGrid(columns: columns, spacing: 20) {
+            ForEach(1...9, id: \.self) { num in
+                numpadButton(label: "\(num)") {
+                    viewModel.appendDigit("\(num)")
+                }
+            }
+            
+            Spacer()
+            
+            numpadButton(label: "0") {
+                viewModel.appendDigit("0")
+            }
+            
+            Button(action: {
+                viewModel.deleteDigit()
+                deleteTapCount += 1
+            }) {
+                Image(systemName: "delete.left.fill")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(width: 75, height: 75)
+                    .symbolEffect(.bounce, value: deleteTapCount)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(BouncyButtonStyle())
+        }
+        .padding()
     }
     
     private func numpadButton(label: String, action: @escaping () -> Void) -> some View {

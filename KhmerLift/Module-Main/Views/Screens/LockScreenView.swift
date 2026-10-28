@@ -11,6 +11,12 @@ struct LockScreenView: View {
     @Bindable var viewModel: KhmerLiftAppScreenViewModel
     
     var body: some View {
+        containerView
+    }
+}
+
+extension LockScreenView {
+    private var containerView: some View {
         VStack(spacing: 24) {
             VStack(spacing: 20) {
                 Image(systemName: "lock")
@@ -54,10 +60,10 @@ struct LockScreenView: View {
                             Text("Unlock with Face ID")
                         }
                         .font(.headline)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(Color.cyan)
+                        .background(Color.cyan.opacity(0.25))
                         .clipShape(Capsule())
                     }
                     .glassEffect(.clear, in: Capsule())
@@ -80,7 +86,7 @@ struct LockScreenView: View {
                         .background(
                             viewModel.isFaceIDEnabled
                                 ? .clear
-                                : Color.blue.opacity(0.15)
+                                : Color.cyan.opacity(0.25)
                         )
                         .clipShape(Capsule())
                     }
@@ -91,6 +97,7 @@ struct LockScreenView: View {
             .padding(.bottom, 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .appBackground()
         
         .fullScreenCover(isPresented: $viewModel.showPasscodeSheet) {
             PasscodeView(mode: .unlock) {
@@ -99,7 +106,5 @@ struct LockScreenView: View {
                 viewModel.showPasscodeSheet = false
             }
         }
-        
-        .appBackground()
     }
 }

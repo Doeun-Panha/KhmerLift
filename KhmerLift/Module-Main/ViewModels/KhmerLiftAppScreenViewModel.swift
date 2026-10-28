@@ -17,30 +17,12 @@ final class KhmerLiftAppScreenViewModel {
         case unlocked
     }
     
-    var lockState: LockState = .checking
-    var errorMessage: String? = nil
-    
-    var showPasscodeSheet: Bool = false {
-        didSet {
-            if showPasscodeSheet {
-                biometricService.cancelAuthentication()
-            }
-        }
-    }
-    private(set) var isAuthenticating: Bool = false
-    private var hasAutoAttemptedFaceID: Bool = false
-    private var hasEnteredBackground: Bool = false
-    
     private let biometricService: BiometricServiceProtocol
     private let faceIDKey = "isFaceIDEnabled"
     private let passcodeKey = "isPasscodeEnabled"
     
-    init(
-        biometricService: BiometricServiceProtocol? = nil
-    ) {
-        let biometricService = biometricService ?? BiometricService()
-        self.biometricService = biometricService
-    }
+    var lockState: LockState = .checking
+    var errorMessage: String? = nil
     
     var isFaceIDEnabled: Bool {
         UserDefaults.standard.bool(forKey: faceIDKey)
@@ -54,6 +36,27 @@ final class KhmerLiftAppScreenViewModel {
         isFaceIDEnabled || isPasscodeEnabled
     }
     
+    var showPasscodeSheet: Bool = false {
+        didSet {
+            if showPasscodeSheet {
+                biometricService.cancelAuthentication()
+            }
+        }
+    }
+    
+    private(set) var isAuthenticating: Bool = false
+    private var hasAutoAttemptedFaceID: Bool = false
+    private var hasEnteredBackground: Bool = false
+    
+    init(
+        biometricService: BiometricServiceProtocol? = nil
+    ) {
+        let biometricService = biometricService ?? BiometricService()
+        self.biometricService = biometricService
+    }
+}
+
+extension KhmerLiftAppScreenViewModel {
     func checkAppLockOnLaunch() async {
         guard isLockEnabled else {
             lockState = .unlocked

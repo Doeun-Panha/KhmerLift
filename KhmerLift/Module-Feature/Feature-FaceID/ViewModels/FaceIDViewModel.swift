@@ -38,7 +38,9 @@ final class FaceIDViewModel: ObservableObject {
         self.onSuccess = onSuccess
         self.onFailure = onFailure
     }
-    
+}
+
+extension FaceIDViewModel {
     func onViewAppear() {
         cameraManager.checkPermissionAndStart()
         

@@ -19,14 +19,43 @@ struct HomeScreenView: View {
 
     var body: some View {
         @Bindable var viewModel = viewModel
+
+        containerView
+    }
+    
+    private func advanceFocus() {
+        switch focusedField {
+        case .bodyWeight:
+            focusedField = nil
+            
+        case .weight:
+            focusedField = .repetition
+            
+        case .repetition, .none:
+            focusedField = nil
+        }
+    }
+    
+    private func scrollToFocusedField(_ field: FormField?, using proxy: ScrollViewProxy) {
+        guard let field else { return }
         
+        Task {
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            withAnimation(.easeInOut(duration: 0.25)) {
+                proxy.scrollTo(field, anchor: .center)
+            }
+        }
+    }
+}
+
+extension HomeScreenView {
+    private var containerView: some View {
         VStack(alignment: .center, spacing: 16) {
             headerView
             
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
-                    formContentView
-                        .padding(.bottom, 120)
+                    contentView
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .onChange(of: focusedField) { _, newField in
@@ -77,15 +106,24 @@ struct HomeScreenView: View {
                 .font(.nunito(20, weight: .medium))
                 .foregroundStyle(viewModel.isLoggedToday ? .orange : .gray)
             
-            Image(viewModel.isLoggedToday ? "active-fire-icon" : "inactive-fire-icon")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 25, height: 25)
+            if viewModel.isLoggedToday {
+                Image("active-fire-icon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+            } else {
+                Image("inactive-fire-icon")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+                    .foregroundStyle(.gray)
+            }
         }
         .padding(.top, 30)
     }
     
-    private var formContentView: some View {
+    private var contentView: some View {
         VStack(spacing: 16) {
             HStack {
                 Spacer()
@@ -129,7 +167,7 @@ struct HomeScreenView: View {
                         .padding(.vertical, 12.5)
                         .contentShape(Rectangle())
                 }
-                .background(Color.blue.opacity(0.15))
+                .background(Color.cyan.opacity(0.25))
                 .clipShape(Capsule())
             }
             .buttonStyle(.plain)
@@ -227,36 +265,13 @@ struct HomeScreenView: View {
                         .padding(.vertical, 12.5)
                         .contentShape(Rectangle())
                 }
-                .background(Color.blue.opacity(0.15))
+                .background(Color.cyan.opacity(0.25))
                 .clipShape(Capsule())
             }
             .buttonStyle(.plain)
             .disabled(!viewModel.isExerciseSetValid)
             .glassEffect(.clear, in: Capsule())
         }
-    }
-    
-    private func advanceFocus() {
-        switch focusedField {
-        case .bodyWeight:
-            focusedField = nil
-            
-        case .weight:
-            focusedField = .repetition
-            
-        case .repetition, .none:
-            focusedField = nil
-        }
-    }
-    
-    private func scrollToFocusedField(_ field: FormField?, using proxy: ScrollViewProxy) {
-        guard let field else { return }
-        
-        Task {
-            try? await Task.sleep(nanoseconds: 250_000_000)
-            withAnimation(.easeInOut(duration: 0.25)) {
-                proxy.scrollTo(field, anchor: .center)
-            }
-        }
+        .padding(.bottom, 120)
     }
 }

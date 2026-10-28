@@ -34,7 +34,9 @@ struct ToastConfig: Equatable {
         self.tintColor = tintColor
         self.style = style
     }
+}
 
+extension ToastConfig {
     static func success(_ message: String, icon: String = "checkmark.circle.fill") -> ToastConfig {
         ToastConfig(message: message, icon: icon, tintColor: .green, style: .success)
     }

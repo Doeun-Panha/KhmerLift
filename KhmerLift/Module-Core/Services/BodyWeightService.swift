@@ -37,7 +37,9 @@ final class BodyWeightService: BodyWeightServiceProtocol {
 //            print("📍 SwiftData Database Path: \(url.path)")
 //        }
     }
-    
+}
+
+extension BodyWeightService {
     func saveBodyWeight(_ weight: Double) throws {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
@@ -74,7 +76,9 @@ final class BodyWeightService: BodyWeightServiceProtocol {
         )
         return (try? context.fetch(descriptor)) ?? []
     }
-    
+}
+
+extension BodyWeightService {
     func saveTargetWeight(_ weight: Double) {
         UserDefaults.standard.set(weight, forKey: targetWeightKey)
     }
@@ -84,4 +88,3 @@ final class BodyWeightService: BodyWeightServiceProtocol {
         return saved > 0 ? saved : 55.0
     }
 }
-

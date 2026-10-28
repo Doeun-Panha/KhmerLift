@@ -17,6 +17,12 @@ struct GlassTabBarView: View {
     private let tabs = TabItem.allCases
     
     var body: some View {
+        containerView
+    }
+}
+
+extension GlassTabBarView {
+    private var containerView: some View {
         HStack(spacing: 10) {
             GeometryReader { proxy in
                 let totalWidth = proxy.size.width
@@ -44,7 +50,7 @@ struct GlassTabBarView: View {
                     : currentIndex
                 
                 ZStack(alignment: .leading) {
-                    LiquidGlassPill()
+                    GlassPillView()
                         .frame(width: pillWidth, height: pillHeight)
                         .scaleEffect(
                             x: isDragging ? 1.06 : 1.0,
@@ -116,38 +122,5 @@ struct GlassTabBarView: View {
         guard tabWidth > 0 else { return 0 }
         let index = Int(xPosition / tabWidth)
         return max(0, min(tabs.count - 1, index))
-    }
-}
-
-struct LiquidGlassPill: View {
-    var body: some View {
-        RoundedRectangle(cornerRadius: 32, style: .continuous)
-            .fill(
-                LinearGradient(
-                    colors: [
-                        .white.opacity(0.35),
-                        .white.opacity(0.14),
-                        .white.opacity(0.04)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 32, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                .white.opacity(0.75),
-                                .white.opacity(0.25),
-                                .white.opacity(0.05)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.0
-                    )
-            )
-            .shadow(color: .black.opacity(0.20), radius: 8, x: 0, y: 4)
     }
 }
