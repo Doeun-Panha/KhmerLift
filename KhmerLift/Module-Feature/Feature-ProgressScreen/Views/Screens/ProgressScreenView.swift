@@ -20,7 +20,7 @@ extension ProgressScreenView {
         VStack(alignment: .center, spacing: 16) {
             headerView
             
-            formContentView
+            contentView
         }
         .padding(.horizontal)
         .padding(.leading, 10)
@@ -29,9 +29,7 @@ extension ProgressScreenView {
             TextField("", value: $inputWeightGoal, format: .number)
                 .keyboardType(.decimalPad)
             
-            Button("Save") {
-                viewModel.saveNewTargetWeight(inputWeightGoal)
-            }
+            Button("Save") { viewModel.saveNewTargetWeight(inputWeightGoal) }
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("Enter your target body weight in kg.")
@@ -49,7 +47,7 @@ extension ProgressScreenView {
         .padding(.top, 30)
     }
     
-    private var formContentView: some View {
+    private var contentView: some View {
         ScrollView {
             VStack(spacing: 16) {
                 WeightSummaryCardView(

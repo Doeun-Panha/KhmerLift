@@ -13,9 +13,14 @@ struct GlassAccessoryButtonView: View {
     let action: () -> Void
     
     let cornerRadius: CGFloat = 32.0
-
     
     var body: some View {
+        contentView
+    }
+}
+
+extension GlassAccessoryButtonView {
+    private var contentView: some View {
         Button(action: action) {
             HStack {
                 Text(name)

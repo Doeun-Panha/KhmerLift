@@ -20,67 +20,10 @@ extension MoreScreenView {
     private var containerView: some View {
         NavigationStack {
             VStack(alignment: .center, spacing: 16) {
-                HStack(spacing: 5) {
-                    Text("Settings")
-                        .font(.nunito(26, weight: .heavy))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        appViewModel.lockApp()
-                        triggerWarningHaptic()
-                    }) {
-                        Image(systemName: "lock")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 44, height: 44)
-                            .clipShape(Circle())
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(BouncyButtonStyle())
-                    .glassEffect(.clear)
-                    .disabled(!appViewModel.isLockEnabled)
-                    .opacity(appViewModel.isLockEnabled ? 1.0 : 0.5)
-                }
-                .padding(.top, 30)
+                headerView
                 
                 ScrollView {
-                    VStack(spacing: 16) {
-                        GlassSwitchButtonView(
-                            title: "Security",
-                            name: "Face ID",
-                            isOn: Binding(
-                                get: { viewModel.enableFaceID },
-                                set: { viewModel.handleFaceIDToggleChange($0) }
-                            )
-                        )
-                        
-//                        GlassAccessoryButtonView(
-//                            name: "My Face",
-//                            assessory: "chevron.right"
-//                        ) {
-//
-//                        }
-                        
-                        GlassSwitchButtonView(
-                            name: "Passcode",
-                            isOn: Binding(
-                                get: { viewModel.enablePasscode },
-                                set: { viewModel.handlePasscodeToggleChange($0) }
-                            )
-                        )
-                        
-                        GlassDropdownView(
-                            title: "Background",
-                            placeholder: "Select Background",
-                            selection: $viewModel.selectedBackground,
-                            items: viewModel.availableBackgrounds,
-                            onAddNew: {
-                                viewModel.isAddingBackground = true
-                            }
-                        )
-                    }
+                    contentView
                 }
                 
                 Spacer()
@@ -137,8 +80,64 @@ extension MoreScreenView {
             .toast(viewModel.toast)
         }
     }
-}
-
-#Preview {
-    MoreScreenView()
+    
+    private var headerView: some View {
+        HStack(spacing: 5) {
+            Text("Settings")
+                .font(.nunito(26, weight: .heavy))
+                .foregroundStyle(.white)
+            
+            Spacer()
+            
+            Button(action: {
+                appViewModel.lockApp()
+                triggerWarningHaptic()
+            }) {
+                Image(systemName: "lock")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .clipShape(Circle())
+                    .glassEffect(.clear, in: Circle())
+                    .contentShape(Circle())
+            }
+            .buttonStyle(BouncyButtonStyle())
+            .disabled(!appViewModel.isLockEnabled)
+            .opacity(appViewModel.isLockEnabled ? 1.0 : 0.5)
+        }
+        .padding(.top, 30)
+    }
+    
+    private var contentView: some View {
+        VStack(spacing: 16) {
+            GlassSwitchButtonView(
+                title: "Security",
+                name: "Face ID",
+                isOn: Binding(
+                    get: { viewModel.enableFaceID },
+                    set: { viewModel.handleFaceIDToggleChange($0) }
+                )
+            )
+            
+//                        GlassAccessoryButtonView(
+//                            name: "My Face",
+//                            assessory: "chevron.right"
+//                        ) {
+//
+//                        }
+            
+            GlassSwitchButtonView(
+                name: "Passcode",
+                isOn: Binding(
+                    get: { viewModel.enablePasscode },
+                    set: { viewModel.handlePasscodeToggleChange($0) }
+                )
+            )
+            
+            GlassDropdownView(
+                config: viewModel.backgroundDropdownConfig,
+                selection: $viewModel.selectedBackground
+            )
+        }
+    }
 }

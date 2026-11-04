@@ -9,6 +9,7 @@ import SwiftUI
 
 struct GlassSwitchButtonView: View {
     let cornerRadius: CGFloat = 32.0
+    
     var title: String? = nil
     let name: String
     
@@ -17,6 +18,12 @@ struct GlassSwitchButtonView: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
+        contentView
+    }
+}
+
+extension GlassSwitchButtonView {
+    private var contentView: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let title {
                 Text(title)
@@ -41,36 +48,4 @@ struct GlassSwitchButtonView: View {
             .glassEffect(.clear, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         }
     }
-}
-
-#Preview {
-    struct GlassSwitchPreviewContainer: View {
-        @State private var enableSound = true
-        @State private var enableFaceID = false
-
-        var body: some View {
-            ZStack {
-                Image("background")
-                    .resizable()
-                    .ignoresSafeArea()
-
-                VStack(spacing: 20) {
-                    GlassSwitchButtonView(
-                        title: "Audio Settings",
-                        name: "Sound Effects",
-                        isOn: $enableSound
-                    )
-
-                    GlassSwitchButtonView(
-                        title: "Security",
-                        name: "Biometric Face ID",
-                        isOn: $enableFaceID
-                    )
-                }
-                .padding()
-            }
-        }
-    }
-
-    return GlassSwitchPreviewContainer()
 }

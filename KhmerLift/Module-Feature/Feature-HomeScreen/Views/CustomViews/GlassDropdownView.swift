@@ -4,34 +4,22 @@
 //
 //  Created by Panha on 18/9/26.
 //
+
 import SwiftUI
 
-struct GlassDropdownView<T: SelectableItem>: View {
+struct GlassDropdownConfig<T: SelectableItem> {
     let title: String
-    @Binding var selection: T?
-    let items: [T]
     let placeholder: String
-    let isDisabled: Bool
-    
+    let items: [T]
+    var isDisabled: Bool = false
     let onAddNew: () -> Void
-    
+}
+
+struct GlassDropdownView<T: SelectableItem>: View {
+    let config: GlassDropdownConfig<T>
+    @Binding var selection: T?
+        
     @State private var isShowingSheet: Bool = false
-    
-    init(
-        title: String,
-        placeholder: String,
-        selection: Binding<T?>,
-        items: [T],
-        isDisabled: Bool = false,
-        onAddNew: @escaping () -> Void
-    ) {
-        self.title = title
-        self.placeholder = placeholder
-        self._selection = selection
-        self.items = items
-        self.isDisabled = isDisabled
-        self.onAddNew = onAddNew
-    }
     
     var body: some View {
         containerView
@@ -41,7 +29,7 @@ struct GlassDropdownView<T: SelectableItem>: View {
 extension GlassDropdownView {
     private var containerView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
+            Text(config.title)
                 .font(.nunito(16, weight: .semibold))
                 .foregroundStyle(.white)
             
@@ -50,7 +38,7 @@ extension GlassDropdownView {
                 isShowingSheet = true
             }) {
                 HStack {
-                    Text(selection?.displayName ?? placeholder)
+                    Text(selection?.displayName ?? config.placeholder)
                         .font(.nunito(16, weight: .semibold))
                         .foregroundStyle(selection == nil ? .white.opacity(0.5) : .white)
                     
@@ -63,8 +51,8 @@ extension GlassDropdownView {
                 .padding()
                 .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
             }
-            .disabled(isDisabled)
-            .opacity(isDisabled ? 0.5 : 1.0)
+            .disabled(config.isDisabled)
+            .opacity(config.isDisabled ? 0.5 : 1.0)
         }
         
         .sheet(isPresented: $isShowingSheet) {
@@ -77,7 +65,7 @@ extension GlassDropdownView {
             HStack {
                 Spacer()
                 
-                Text("Select \(title)")
+                Text("Select \(config.title)")
                     .font(.nunito(18, weight: .bold))
                     .foregroundStyle(.white)
                 
@@ -91,7 +79,7 @@ extension GlassDropdownView {
             
             ScrollView {
                 VStack(spacing: 8) {
-                    ForEach(items) { item in
+                    ForEach(config.items) { item in
                         Button(action: {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                 selection = item
@@ -120,11 +108,11 @@ extension GlassDropdownView {
             VStack {
                 Button(action: {
                     isShowingSheet = false
-                    onAddNew()
+                    config.onAddNew()
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "plus")
-                        Text("Add New \(title)")
+                        Text("Add New \(config.title)")
                     }
                     .font(.nunito(16, weight: .bold))
                     .foregroundStyle(.white)

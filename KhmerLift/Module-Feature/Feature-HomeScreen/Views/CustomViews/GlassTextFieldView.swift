@@ -7,19 +7,22 @@
 
 import SwiftUI
 
-struct GlassTextFieldView: View {
-    let cornerRadius: CGFloat = 32.0
-    
+struct GlassTextFieldConfig {
     let title: String
     let placeholder: String
-    @Binding var text: String
     var keyboardType: UIKeyboardType = .default
     var maxLength: Int = 6
     var maxDecimalPlaces: Int = 2
     var allowedRange: ClosedRange<Double>? = nil
-    
     var onExceedLimit: (() -> Void)? = nil
     var onOutOfRange: (() -> Void)? = nil
+}
+
+struct GlassTextFieldView: View {
+    let cornerRadius: CGFloat = 32.0
+    
+    let config: GlassTextFieldConfig
+    @Binding var text: String
     
     @FocusState private var isFocused: Bool
     
@@ -31,7 +34,7 @@ struct GlassTextFieldView: View {
 extension GlassTextFieldView {
     private var containerView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
+            Text(config.title)
                 .font(.nunito(16, weight: .semibold))
                 .fontWeight(.bold)
                 .foregroundStyle(.white)
@@ -40,12 +43,12 @@ extension GlassTextFieldView {
                 TextField(
                     "",
                     text: $text,
-                    prompt: Text(placeholder)
+                    prompt: Text(config.placeholder)
                         .font(.nunito(16, weight: .semibold))
                         .foregroundStyle(.gray)
                 )
                 .focused($isFocused)
-                .keyboardType(keyboardType)
+                .keyboardType(config.keyboardType)
                 .font(.nunito(16, weight: .semibold))
                 .foregroundStyle(.white)
                 .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { obj in
@@ -78,7 +81,7 @@ extension GlassTextFieldView {
     private func validateInput(oldValue: String, newValue: String) {
         guard !newValue.isEmpty else { return }
         
-        let isNumberPad = keyboardType == .numberPad
+        let isNumberPad = config.keyboardType == .numberPad
         
         let allowedSet = isNumberPad ? "0123456789" : "0123456789."
         var filtered = newValue.filter { allowedSet.contains($0) }
@@ -95,7 +98,7 @@ extension GlassTextFieldView {
             filtered.removeFirst()
         }
         
-        let allowedDecimals = isNumberPad ? 0 : maxDecimalPlaces
+        let allowedDecimals = isNumberPad ? 0 : config.maxDecimalPlaces
         if let dotIndex = filtered.firstIndex(of: ".") {
             let decimalDigits = filtered[filtered.index(after: dotIndex)...]
             if decimalDigits.count > allowedDecimals {
@@ -103,16 +106,16 @@ extension GlassTextFieldView {
             }
         }
         
-        if filtered.count > maxLength {
-            filtered = String(filtered.prefix(maxLength))
-            onExceedLimit?()
+        if filtered.count > config.maxLength {
+            filtered = String(filtered.prefix(config.maxLength))
+            config.onExceedLimit?()
         }
         
-        if let range = allowedRange {
+        if let range = config.allowedRange {
             let cleanNumberString = filtered.trimmingCharacters(in: CharacterSet(charactersIn: "."))
             if let doubleVal = Double(cleanNumberString), doubleVal > range.upperBound {
                 filtered = oldValue
-                onOutOfRange?()
+                config.onOutOfRange?()
             }
         }
         

@@ -225,5 +225,13 @@ extension MoreScreenViewModel {
 }
 
 extension MoreScreenViewModel {
-    
+    var backgroundDropdownConfig: GlassDropdownConfig<BackgroundModel> {
+        GlassDropdownConfig(
+            title: "Background",
+            placeholder: "Select Background",
+            items: availableBackgrounds,
+            onAddNew: { [weak self] in
+                self?.isAddingBackground = true
+            })
+    }
 }

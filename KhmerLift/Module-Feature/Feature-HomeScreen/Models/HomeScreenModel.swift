@@ -104,3 +104,15 @@ final class ExerciseLog {
         self.repetition = repetition
     }
 }
+
+struct WaterLog: Identifiable, Codable {
+    let id: UUID
+    let amount: Double
+    let timestamp: Date
+    
+    init(id: UUID = UUID(), amount: Double, timestamp: Date = Date()) {
+        self.id = id
+        self.amount = amount
+        self.timestamp = timestamp
+    }
+}

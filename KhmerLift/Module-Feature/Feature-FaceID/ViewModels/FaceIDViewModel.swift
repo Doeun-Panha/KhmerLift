@@ -17,7 +17,7 @@ final class FaceIDViewModel: ObservableObject {
     
     @Published var timer: Int
     @Published var status: String
-    @Published var isMuted: Bool = false
+//    @Published var isMuted: Bool = false
     @Published var isAuthenticated: Bool = false
     @Published var shouldDismiss: Bool = false
     
@@ -58,9 +58,9 @@ extension FaceIDViewModel {
         cameraManager.stopSession()
     }
     
-    func toggleMute() {
-        isMuted.toggle()
-    }
+//    func toggleMute() {
+//        isMuted.toggle()
+//    }
     
     private func authenticateWithFaceID() async {
         try? await Task.sleep(for: .seconds(1))

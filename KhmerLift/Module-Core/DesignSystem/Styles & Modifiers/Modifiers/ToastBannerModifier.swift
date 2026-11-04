@@ -36,16 +36,12 @@ struct ToastModifier: ViewModifier {
         switch config.style {
         case .success:
             generator.notificationOccurred(.success)
-//            AudioServicesPlaySystemSound(1054)
         case .warning:
             generator.notificationOccurred(.warning)
-//            AudioServicesPlaySystemSound(1007)
         case .error:
-//            generator.notificationOccurred(.error)
             AudioServicesPlaySystemSound(1053)
         case .info:
             generator.notificationOccurred(.warning)
-//            AudioServicesPlaySystemSound(1000)
         }
     }
 }

@@ -81,15 +81,3 @@ struct ToastBannerView: View {
         .padding(.horizontal, 16)
     }
 }
-
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        
-        VStack(spacing: 20) {
-            ToastBannerView(config: .success("Face ID enabled successfully!"))
-            ToastBannerView(config: .error("Please set up Face ID in iOS Settings first."))
-            ToastBannerView(config: .info("Looking for face...", icon: "faceid"))
-        }
-    }
-}

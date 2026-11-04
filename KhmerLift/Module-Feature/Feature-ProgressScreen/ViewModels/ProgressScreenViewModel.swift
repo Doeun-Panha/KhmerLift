@@ -15,6 +15,10 @@ final class ProgressScreenViewModel {
     
     var summary: BodyWeightSummary = BodyWeightSummary()
     
+    var targetWeight: Double {
+        return summary.targetWeight
+    }
+    
     init(bodyWeightService: BodyWeightServiceProtocol? = nil) {
         self.bodyWeightService = bodyWeightService ?? BodyWeightService()
     }
